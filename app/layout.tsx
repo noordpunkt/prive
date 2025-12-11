@@ -1,20 +1,29 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+// Custom font configuration - Using only 2 fonts
+const customFont = localFont({
+  src: [
+    {
+      path: "../fonts/AB-Prive-Regular-L.otf",
+      weight: "400",
+      style: "normal",
+    },
+    {
+      path: "../fonts/AB-Prive-SemiBold-L.otf",
+      weight: "600",
+      style: "normal",
+    },
+  ],
+  variable: "--font-custom",
+  fallback: ["system-ui", "arial"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "Côte d'Azur Services - Premium Services Platform",
-  description: "Discover premium private services in the Côte d'Azur: private chefs, hairdressers, cleaning, gardening, chauffeurs, babysitting, personal shopping, styling, and interior design.",
+  title: "Privé à la Carte - Services Platform",
+  description: "Discover premium private services à la carte: private chefs, hairdressers, cleaning, gardening, chauffeurs, babysitting, personal shopping, styling, and interior design.",
 };
 
 export default function RootLayout({
@@ -23,9 +32,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${customFont.variable} antialiased`}
       >
         {children}
       </body>
