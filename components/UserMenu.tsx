@@ -14,7 +14,6 @@ export function UserMenu() {
   const [profile, setProfile] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [authModalOpen, setAuthModalOpen] = useState(false)
-  const [authModalMode, setAuthModalMode] = useState<'signin' | 'signup'>('signup')
 
   useEffect(() => {
     const supabase = createClient()
@@ -154,29 +153,16 @@ export function UserMenu() {
 
   return (
     <>
-      <div className="flex gap-4">
-        <Button 
-          variant="ghost" 
-          onClick={() => {
-            setAuthModalMode('signin')
-            setAuthModalOpen(true)
-          }}
-        >
-          Sign In
-        </Button>
-        <Button 
-          onClick={() => {
-            setAuthModalMode('signup')
-            setAuthModalOpen(true)
-          }}
-        >
-          Get Started
-        </Button>
-      </div>
+      <Button 
+        onClick={() => {
+          setAuthModalOpen(true)
+        }}
+      >
+        Get Started
+      </Button>
       <AuthModal 
         open={authModalOpen} 
         onOpenChange={setAuthModalOpen}
-        mode={authModalMode}
       />
     </>
   )

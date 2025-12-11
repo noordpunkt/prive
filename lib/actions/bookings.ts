@@ -21,10 +21,10 @@ export async function createBooking(bookingData: {
     throw new Error('Unauthorized')
   }
 
-  // Get provider to calculate price
+  // Get provider to calculate price and verify availability
   const { data: provider, error: providerError } = await supabase
     .from('service_providers')
-    .select('hourly_rate')
+    .select('hourly_rate, status, available, min_duration_hours, max_duration_hours')
     .eq('id', bookingData.provider_id)
     .single()
 
@@ -33,17 +33,6 @@ export async function createBooking(bookingData: {
   }
 
   const total_price = (provider.hourly_rate || 0) * bookingData.duration_hours
-
-  // Verify provider is available and approved
-  const { data: provider, error: providerCheckError } = await supabase
-    .from('service_providers')
-    .select('id, status, available, min_duration_hours, max_duration_hours')
-    .eq('id', bookingData.provider_id)
-    .single()
-
-  if (providerCheckError || !provider) {
-    throw new Error('Provider not found')
-  }
 
   if (provider.status !== 'approved') {
     throw new Error('Provider is not approved')
@@ -54,7 +43,7 @@ export async function createBooking(bookingData: {
   }
 
   // Validate duration
-  if (bookingData.duration_hours < provider.min_duration_hours) {
+  if (provider.min_duration_hours && bookingData.duration_hours < provider.min_duration_hours) {
     throw new Error(`Minimum duration is ${provider.min_duration_hours} hours`)
   }
 

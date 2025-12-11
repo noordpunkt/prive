@@ -3,9 +3,10 @@ import { NextResponse } from 'next/server'
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const supabase = await createClient()
     
     const { data: { user }, error: authError } = await supabase.auth.getUser()
@@ -39,7 +40,7 @@ export async function GET(
         ),
         reviews (*)
       `)
-      .eq('id', params.id)
+      .eq('id', id)
       .single()
 
     if (error || !booking) {
@@ -69,9 +70,10 @@ export async function GET(
 
 export async function PATCH(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const supabase = await createClient()
     
     const { data: { user }, error: authError } = await supabase.auth.getUser()
@@ -90,7 +92,7 @@ export async function PATCH(
     const { data: booking, error: bookingError } = await supabase
       .from('bookings')
       .select('customer_id, provider:service_providers(profile_id)')
-      .eq('id', params.id)
+      .eq('id', id)
       .single()
 
     if (bookingError || !booking) {
@@ -120,7 +122,7 @@ export async function PATCH(
     const { data: updatedBooking, error: updateError } = await supabase
       .from('bookings')
       .update(updateData)
-      .eq('id', params.id)
+      .eq('id', id)
       .select()
       .single()
 

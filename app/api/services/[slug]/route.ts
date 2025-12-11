@@ -3,15 +3,16 @@ import { NextResponse } from 'next/server'
 
 export async function GET(
   request: Request,
-  { params }: { params: { slug: string } }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
+    const { slug } = await params
     const supabase = await createClient()
     
     const { data: category, error } = await supabase
       .from('service_categories')
       .select('*')
-      .eq('slug', params.slug)
+      .eq('slug', slug)
       .eq('active', true)
       .single()
 

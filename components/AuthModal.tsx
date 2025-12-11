@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { X } from 'lucide-react'
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -12,24 +13,25 @@ import { useRouter } from 'next/navigation'
 interface AuthModalProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  mode: 'signin' | 'signup'
 }
 
-export function AuthModal({ open, onOpenChange, mode }: AuthModalProps) {
+export function AuthModal({ open, onOpenChange }: AuthModalProps) {
   const router = useRouter()
+  const [activeTab, setActiveTab] = useState<'signin' | 'signup'>('signup')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
   const [successMessage, setSuccessMessage] = useState('')
   
-  // Reset error when modal opens/closes or mode changes
+  // Reset error when modal opens/closes
   useEffect(() => {
     if (!open) {
       setError(null)
       setSuccess(false)
       setSuccessMessage('')
+      setActiveTab('signup')
     }
-  }, [open, mode])
+  }, [open])
 
   // Sign up form state
   const [signUpData, setSignUpData] = useState({
@@ -136,7 +138,7 @@ export function AuthModal({ open, onOpenChange, mode }: AuthModalProps) {
       >
         {/* Dialog Title for accessibility */}
         <DialogTitle className="sr-only">
-          {mode === 'signup' ? 'Register' : 'Sign in'}
+          Authentication
         </DialogTitle>
 
         {/* Close button */}
@@ -149,7 +151,7 @@ export function AuthModal({ open, onOpenChange, mode }: AuthModalProps) {
         </button>
 
         {/* Content */}
-        <div className="p-6 min-h-[450px] flex flex-col">
+        <div className="p-6 pt-16 min-h-[450px] flex flex-col">
           {success ? (
             // Success state - only show centered message
             <div className="flex-1 flex items-center justify-center">
@@ -158,21 +160,20 @@ export function AuthModal({ open, onOpenChange, mode }: AuthModalProps) {
               </p>
             </div>
           ) : (
-            // Normal state - show form
-            <div className="space-y-8 flex-1">
-              <div className="text-center">
-                <h2 className="text-2xl font-semibold mb-2" style={{ fontFamily: 'var(--font-custom)', fontWeight: 600 }}>
-                  {mode === 'signup' ? 'Register' : 'Sign in'}
-                </h2>
-              </div>
+            // Normal state - show tabs with forms
+            <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'signin' | 'signup')} className="flex-1 flex flex-col">
+              <TabsList className="grid w-full grid-cols-2 mb-6">
+                <TabsTrigger value="signup">Register</TabsTrigger>
+                <TabsTrigger value="signin">Sign In</TabsTrigger>
+              </TabsList>
 
               {error && (
-                <div className="p-3 text-sm bg-destructive/10 text-destructive border border-destructive/20">
+                <div className="p-3 text-sm bg-destructive/10 text-destructive border border-destructive/20 mb-6">
                   {error}
                 </div>
               )}
 
-              {mode === 'signup' ? (
+              <TabsContent value="signup" className="flex-1 mt-0">
                 <form onSubmit={handleSignUp} className="space-y-6">
                   <div className="space-y-2">
                     <Label htmlFor="name">Name</Label>
@@ -214,10 +215,12 @@ export function AuthModal({ open, onOpenChange, mode }: AuthModalProps) {
                   </div>
 
                   <Button type="submit" className="w-full relative" loading={loading}>
-                    Create an account
+                    Register
                   </Button>
                 </form>
-              ) : (
+              </TabsContent>
+
+              <TabsContent value="signin" className="flex-1 mt-0">
                 <form onSubmit={handleSignIn} className="space-y-6">
                   <div className="space-y-2">
                     <Label htmlFor="signin-email">Email</Label>
@@ -249,8 +252,8 @@ export function AuthModal({ open, onOpenChange, mode }: AuthModalProps) {
                     Sign in
                   </Button>
                 </form>
-              )}
-            </div>
+              </TabsContent>
+            </Tabs>
           )}
         </div>
       </DialogContent>
