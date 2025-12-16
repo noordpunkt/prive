@@ -1,8 +1,15 @@
 // Quick test script to verify Supabase connection
+// IMPORTANT: Replace the placeholder values with your actual Supabase credentials from .env.local
 const { createClient } = require('@supabase/supabase-js')
 
-const supabaseUrl = 'https://dgpntdkjsvkcftleryjx.supabase.co'
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRncG50ZGtqc3ZrY2Z0bGVyeWp4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUzNzkwNjIsImV4cCI6MjA4MDk1NTA2Mn0.cAdPvfE1zJN_eHR0OlFpTI2Dia7ys8vJBLzFkfO4ZpA'
+// Get credentials from environment variables or replace with your actual values
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'YOUR_SUPABASE_URL_HERE'
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'YOUR_SUPABASE_ANON_KEY_HERE'
+
+if (supabaseUrl === 'YOUR_SUPABASE_URL_HERE' || supabaseKey === 'YOUR_SUPABASE_ANON_KEY_HERE') {
+  console.error('❌ Error: Please set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY in your .env.local file')
+  process.exit(1)
+}
 
 const supabase = createClient(supabaseUrl, supabaseKey)
 

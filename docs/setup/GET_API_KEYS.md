@@ -19,8 +19,9 @@ You're currently on: **Settings → Data API**
 
 The keys are JWT tokens that look like this:
 ```
-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRncG50ZGtqc3ZrY2Z0bGVyeWp4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzM4NDU2MDAsImV4cCI6MjA0OTQyMTYwMH0.xxxxx...
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlvdXJfcHJvamVjdF9yZWYiLCJyb2xlIjoiYW5vbiIsImlhdCI6MTczMzg0NTYwMCwiZXhwIjoyMDQ5NDIxNjAwfQ.xxxxx...
 ```
+(Note: This is just an example format - use your actual keys from the Supabase dashboard)
 
 ## Security Notes
 

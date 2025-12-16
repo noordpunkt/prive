@@ -29,7 +29,8 @@ Go to: https://supabase.com/dashboard/project/dgpntdkjsvkcftleryjx/settings/api
 ## Key Format
 
 - Standard Supabase API keys are **JWT tokens** that look like:
-  - `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRncG50ZGtqc3ZrY2Z0bGVyeWp4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzM4NDU2MDAsImV4cCI6MjA0OTQyMTYwMH0...`
+  - `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlvdXJfcHJvamVjdF9yZWYiLCJyb2xlIjoiYW5vbiIsImlhdCI6MTczMzg0NTYwMCwiZXhwIjoyMDQ5NDIxNjAwfQ...`
+  (Note: This is just an example format - use your actual keys from the Supabase dashboard)
 
 - The **anon/public** key is safe to use in the browser (with RLS enabled)
 - The **service_role** key has admin access - keep it secret!

@@ -4,11 +4,12 @@
 
 cat > .env.local << 'EOF'
 # Supabase Configuration
-NEXT_PUBLIC_SUPABASE_URL=https://dgpntdkjsvkcftleryjx.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_JFejKohAvuA5f5zsQTekPg_tnI7I4Pg
+# Get these values from: Supabase Dashboard → Project Settings → API
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_public_key_here
 
 # Supabase Service Role Key (for server-side operations only - never expose to client)
-SUPABASE_SERVICE_ROLE_KEY=sb_secret_-TK3R6rFnX9o1JUjRkMnlQ_03LMTX9f
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key_here
 EOF
 
 echo "✅ .env.local file created!"
