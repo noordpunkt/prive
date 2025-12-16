@@ -42,9 +42,9 @@ export default function Home() {
               <Link
                 key={service.id}
                 href={`/services/${service.slug}`}
-                className={`bg-white dark:bg-black border-t border-b border-neutral-900/10 flex-1 flex flex-col items-center justify-center p-6 md:p-6 min-h-[400px] md:min-h-0 relative cursor-pointer transition-opacity hover:opacity-90 ${
-                  isFirst ? '' : 'border-l border-neutral-900/10'
-                } ${isLast ? '' : 'border-r border-neutral-900/10'
+                className={`bg-white dark:bg-black border-t border-b border-black/10 dark:border-white/10 flex-1 flex flex-col items-center justify-center p-6 md:p-6 min-h-[400px] md:min-h-0 relative cursor-pointer transition-opacity hover:opacity-90 ${
+                  isFirst ? '' : 'border-l border-black/10 dark:border-white/10'
+                } ${isLast ? '' : 'border-r border-black/10 dark:border-white/10'
                 }`}
                 style={{ borderWidth: '0.5px' }}
               >

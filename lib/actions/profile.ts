@@ -95,3 +95,62 @@ export async function completeOnboarding(data: ProfileUpdateData) {
   return updatedProfile
 }
 
+/**
+ * Upload avatar image to Supabase Storage
+ */
+export async function uploadAvatar(file: File) {
+  const supabase = await createClient()
+  
+  // Get current user
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
+  if (authError || !user) {
+    throw new Error('Unauthorized')
+  }
+
+  // Validate file type
+  const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
+  if (!validTypes.includes(file.type)) {
+    throw new Error('Invalid file type. Please upload a JPEG, PNG, WebP, or GIF image.')
+  }
+
+  // Validate file size (max 5MB)
+  if (file.size > 5 * 1024 * 1024) {
+    throw new Error('File size too large. Maximum size is 5MB.')
+  }
+
+  // Create a unique filename
+  const fileExt = file.name.split('.').pop()
+  const fileName = `${user.id}-${Date.now()}.${fileExt}`
+  const filePath = `${user.id}/${fileName}`
+
+  // Upload to Supabase Storage
+  const { data, error } = await supabase.storage
+    .from('avatars')
+    .upload(filePath, file, {
+      cacheControl: '3600',
+      upsert: false
+    })
+
+  if (error) {
+    throw new Error(`Failed to upload: ${error.message}`)
+  }
+
+  // Get public URL
+  const { data: { publicUrl } } = supabase.storage
+    .from('avatars')
+    .getPublicUrl(filePath)
+
+  // Update profile with new avatar URL
+  const { error: updateError } = await supabase
+    .from('profiles')
+    .update({ avatar_url: publicUrl })
+    .eq('id', user.id)
+
+  if (updateError) {
+    throw new Error(`Failed to update profile: ${updateError.message}`)
+  }
+
+  revalidatePath('/profile')
+  return publicUrl
+}
+

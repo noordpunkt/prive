@@ -9,9 +9,10 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
+import { AddressAutocomplete } from '@/components/AddressAutocomplete'
 import { createBooking } from '@/lib/actions/bookings'
 import { getProviderById } from '@/lib/actions/services'
-import { Star, MapPin, Euro, Clock } from 'lucide-react'
+import { Star, MapPin, Euro } from 'lucide-react'
 import Link from 'next/link'
 
 export default function BookPage() {
@@ -26,7 +27,7 @@ export default function BookPage() {
   
   const [formData, setFormData] = useState({
     scheduled_at: '',
-    duration_hours: 2,
+    duration_hours: 1,
     address: '',
     address_details: '',
     notes: '',
@@ -39,12 +40,11 @@ export default function BookPage() {
       try {
         const providerData = await getProviderById(providerId)
         setProvider(providerData)
-        if (providerData?.min_duration_hours) {
-          setFormData(prev => ({
-            ...prev,
-            duration_hours: providerData.min_duration_hours
-          }))
-        }
+        // Set default duration to 1 hour
+        setFormData(prev => ({
+          ...prev,
+          duration_hours: 1
+        }))
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load provider')
       } finally {
@@ -54,9 +54,34 @@ export default function BookPage() {
     loadProvider()
   }, [providerId])
 
+  const validateForm = (): string | null => {
+    if (!formData.scheduled_at) {
+      return 'Please select a date and time'
+    }
+
+    const selectedDate = new Date(formData.scheduled_at)
+    const now = new Date()
+    if (selectedDate <= now) {
+      return 'Please select a future date and time'
+    }
+
+    if (!formData.address.trim()) {
+      return 'Please enter an address'
+    }
+
+    return null
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!provider || !providerId) return
+
+    // Validate form
+    const validationError = validateForm()
+    if (validationError) {
+      setError(validationError)
+      return
+    }
 
     setSubmitting(true)
     setError(null)
@@ -119,7 +144,7 @@ export default function BookPage() {
   }
 
   const displayName = provider.business_name || provider.profiles?.full_name || 'Provider'
-  const totalPrice = (provider.hourly_rate || 0) * formData.duration_hours
+  const price = provider.hourly_rate || 0
   const minDate = new Date().toISOString().slice(0, 16)
 
   return (
@@ -168,40 +193,19 @@ export default function BookPage() {
               />
             </div>
 
-            {/* Duration */}
-            <div>
-              <Label htmlFor="duration_hours">Duration (hours) *</Label>
-              <Input
-                id="duration_hours"
-                type="number"
-                min={provider.min_duration_hours || 1}
-                max={provider.max_duration_hours || 24}
-                value={formData.duration_hours}
-                onChange={(e) => setFormData({ ...formData, duration_hours: parseInt(e.target.value) || 1 })}
-                required
-                disabled={!provider.available}
-                className="mt-2"
-              />
-              {provider.min_duration_hours && provider.max_duration_hours && (
-                <p className="text-sm text-muted-foreground mt-1">
-                  Minimum: {provider.min_duration_hours}h, Maximum: {provider.max_duration_hours}h
-                </p>
-              )}
-            </div>
-
             {/* Address */}
             <div>
               <Label htmlFor="address">Address *</Label>
-              <Input
-                id="address"
-                type="text"
-                value={formData.address}
-                onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-                placeholder="Street address, city, postal code"
-                required
-                disabled={!provider.available}
-                className="mt-2"
-              />
+              <div className="mt-2">
+                <AddressAutocomplete
+                  id="address"
+                  value={formData.address}
+                  onChange={(value) => setFormData({ ...formData, address: value })}
+                  placeholder="Street address, city, postal code"
+                  required
+                  disabled={!provider.available}
+                />
+              </div>
             </div>
 
             {/* Address Details */}
@@ -235,22 +239,13 @@ export default function BookPage() {
             {/* Price Summary */}
             <Card className="shadow-none">
               <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-2">
-                    <Clock className="w-5 h-5 text-muted-foreground" />
-                    <span className="text-muted-foreground">
-                      {formData.duration_hours} {formData.duration_hours === 1 ? 'hour' : 'hours'}
-                    </span>
-                  </div>
+                <div className="flex items-center justify-center">
                   <div className="flex items-center gap-2">
                     <Euro className="w-5 h-5 text-muted-foreground" />
                     <span className="text-2xl font-bold">
-                      €{totalPrice.toFixed(2)}
+                      €{price.toFixed(2)}
                     </span>
                   </div>
-                </div>
-                <div className="text-sm text-muted-foreground">
-                  €{provider.hourly_rate?.toFixed(2)} per hour
                 </div>
               </CardContent>
             </Card>
@@ -265,24 +260,14 @@ export default function BookPage() {
             )}
 
             {/* Submit Button */}
-            <div className="flex gap-4">
-              <Button
-                type="submit"
-                size="lg"
-                disabled={!provider.available || submitting}
-                className="flex-1"
-              >
-                {submitting ? 'Booking...' : 'Confirm Booking'}
-              </Button>
-              <Button
-                type="button"
-                variant="outline"
-                size="lg"
-                asChild
-              >
-                <Link href={providerId ? `/providers/${providerId}` : '/'}>Cancel</Link>
-              </Button>
-            </div>
+            <Button
+              type="submit"
+              size="lg"
+              disabled={!provider.available || submitting}
+              className="w-full"
+            >
+              {submitting ? 'Booking...' : 'Confirm Booking'}
+            </Button>
           </form>
         </div>
       </main>

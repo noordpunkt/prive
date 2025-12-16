@@ -84,26 +84,28 @@ export async function signIn(email: string, password: string) {
     throw new Error(`Sign in failed: ${error.message}`)
   }
 
-  // Get user profile to determine redirect
+  // Get user to determine redirect
   const { data: { user } } = await supabase.auth.getUser()
   if (user) {
+    // Check user role
     const { data: profile } = await supabase
       .from('profiles')
       .select('role')
       .eq('id', user.id)
       .single()
 
-    // Redirect based on role
+    if (profile?.role === 'admin') {
+      redirect('/admin')
+      return
+    }
+
     if (profile?.role === 'provider') {
       redirect('/provider/dashboard')
-    } else if (profile?.role === 'admin') {
-      redirect('/admin')
-    } else {
-      redirect('/')
+      return
     }
-  } else {
-    redirect('/')
   }
+  
+  redirect('/')
 }
 
 export async function signOut() {

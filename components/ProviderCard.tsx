@@ -91,7 +91,7 @@ export function ProviderCard({ provider, serviceSlug }: ProviderCardProps) {
               )}
 
               {/* Price and Availability */}
-              <div className="mt-auto pt-4 border-t border-neutral-900/10">
+              <div className="mt-auto pt-4 border-t border-black/10 dark:border-white/10">
                 <div className="flex items-center justify-between mb-4">
                   <div>
                     <div className="text-2xl font-bold">

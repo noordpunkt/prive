@@ -35,7 +35,7 @@ export function ServiceCard({ service, index }: ServiceCardProps) {
       whileHover={{ y: -8, transition: { duration: 0.2 } }}
     >
       <Link href={`/services/${service.slug}`}>
-        <Card className="h-full cursor-pointer transition-all duration-300 hover:border-neutral-900/10 p-8 rounded-none shadow-none">
+        <Card className="h-full cursor-pointer transition-all duration-300 hover:border-black/10 hover:dark:border-white/10 p-8 rounded-none shadow-none">
           <CardHeader className="p-0">
             <div className="mb-6">
               <Icon className="w-16 h-16" strokeWidth={1.5} />

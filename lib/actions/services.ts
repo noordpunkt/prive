@@ -99,3 +99,20 @@ export async function getProviderById(providerId: string) {
   return data
 }
 
+export async function getServicePackagesByProvider(providerId: string) {
+  const supabase = await createClient()
+  
+  const { data, error } = await supabase
+    .from('service_packages')
+    .select('*')
+    .eq('provider_id', providerId)
+    .order('created_at', { ascending: true })
+
+  if (error) {
+    console.error('Error fetching service packages:', error)
+    throw new Error(`Failed to fetch service packages: ${error.message}`)
+  }
+
+  return data || []
+}
+

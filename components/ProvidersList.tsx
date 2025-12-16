@@ -160,7 +160,7 @@ export function ProvidersList({ providers: initialProviders, serviceCategoryId, 
 
         {/* Filter Panel */}
         {showFilters && (
-          <div className="border border-neutral-900/10 p-4 space-y-4 bg-white dark:bg-black">
+          <div className="border border-black/10 dark:border-white/10 p-4 space-y-4 bg-white dark:bg-black">
             <div className="flex items-center justify-between">
               <h3 className="font-semibold">Filters</h3>
               {hasActiveFilters && (

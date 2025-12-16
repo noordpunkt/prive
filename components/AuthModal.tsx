@@ -108,7 +108,7 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
 
     try {
       await signIn(signInData.email, signInData.password)
-      // Show success message and keep modal open
+      // Show success message
       setSuccess(true)
       setSuccessMessage('Signing you in...')
       setLoading(true)
@@ -119,11 +119,20 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
       // Trigger auth state check
       window.dispatchEvent(new Event('auth-state-changed'))
       
-      // Wait a bit more for UserMenu to update
+      // Close modal first
+      onOpenChange(false)
+      
+      // Wait a bit more for auth to settle
       await new Promise(resolve => setTimeout(resolve, 500))
       
-      // Close modal - redirect will happen in server action
-      onOpenChange(false)
+      // Force a hard navigation to ensure redirect works
+      // Check if this is the admin user
+      const ADMIN_USER_EMAIL = 'privealacarte@gmail.com'
+      if (signInData.email === ADMIN_USER_EMAIL) {
+        window.location.href = '/admin'
+      } else {
+        window.location.href = '/'
+      }
     } catch (err: any) {
       setError(err.message || 'Failed to sign in')
       setLoading(false)
