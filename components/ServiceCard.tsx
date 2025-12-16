@@ -7,11 +7,6 @@ import { ServiceCategory } from '@/types/services'
 import { 
   ChefHat, 
   Scissors, 
-  Sparkles, 
-  Sprout, 
-  Car, 
-  Baby, 
-  ShoppingBag, 
   Shirt, 
   Home,
   type LucideIcon
@@ -20,11 +15,6 @@ import {
 const iconMap: Record<string, LucideIcon> = {
   'chef-hat': ChefHat,
   'scissors': Scissors,
-  'sparkles': Sparkles,
-  'sprout': Sprout,
-  'car': Car,
-  'baby': Baby,
-  'shopping-bag': ShoppingBag,
   'shirt': Shirt,
   'home': Home,
 }
@@ -45,13 +35,18 @@ export function ServiceCard({ service, index }: ServiceCardProps) {
       whileHover={{ y: -8, transition: { duration: 0.2 } }}
     >
       <Link href={`/services/${service.slug}`}>
-        <Card className="h-full cursor-pointer transition-all duration-300 hover:shadow-lg hover:border-primary/50">
-          <CardHeader>
-            <div className="mb-2">
-              <Icon className="w-12 h-12" strokeWidth={1.5} />
+        <Card className="h-full cursor-pointer transition-all duration-300 hover:border-neutral-900/10 p-8 rounded-none shadow-none">
+          <CardHeader className="p-0">
+            <div className="mb-6">
+              <Icon className="w-16 h-16" strokeWidth={1.5} />
             </div>
-            <CardTitle className="text-xl">{service.name}</CardTitle>
-            <CardDescription className="text-sm mt-2">
+            <CardTitle
+              className="text-2xl mb-3"
+              style={{ fontFamily: 'var(--font-grand-medium)' }}
+            >
+              {service.name}
+            </CardTitle>
+            <CardDescription className="text-base">
               {service.description}
             </CardDescription>
           </CardHeader>

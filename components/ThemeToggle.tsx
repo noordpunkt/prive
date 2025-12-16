@@ -38,26 +38,29 @@ export function ThemeToggle() {
   // Prevent hydration mismatch
   if (!mounted) {
     return (
-      <Button variant="ghost" size="icon" aria-label="Toggle theme">
+      <button
+        type="button"
+        aria-label="Toggle theme"
+        className="inline-flex items-center justify-center p-0 bg-transparent border-none text-foreground"
+      >
         <Sun className="h-5 w-5" />
-      </Button>
+      </button>
     )
   }
 
   return (
-    <Button
-      variant="ghost"
-      size="icon"
+    <button
+      type="button"
       onClick={toggleTheme}
       aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
-      className="transition-colors"
+      className="inline-flex items-center justify-center p-0 bg-transparent border-none text-foreground"
     >
       {theme === 'light' ? (
         <Moon className="h-5 w-5" />
       ) : (
         <Sun className="h-5 w-5" />
       )}
-    </Button>
+    </button>
   )
 }
 

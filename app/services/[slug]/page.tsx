@@ -1,7 +1,9 @@
 import { SERVICE_CATEGORIES } from '@/types/services'
 import { notFound } from 'next/navigation'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { Header } from '@/components/Header'
+import { Footer } from '@/components/Footer'
 import { 
   ChefHat, 
   Scissors, 
@@ -14,6 +16,9 @@ import {
   Home,
   type LucideIcon
 } from 'lucide-react'
+import { getServiceBySlug, getProvidersByCategory } from '@/lib/actions/services'
+import { ProvidersList } from '@/components/ProvidersList'
+import Link from 'next/link'
 
 const iconMap: Record<string, LucideIcon> = {
   'chef-hat': ChefHat,
@@ -28,56 +33,113 @@ const iconMap: Record<string, LucideIcon> = {
 }
 
 interface ServicePageProps {
-  params: {
+  params: Promise<{
     slug: string
-  }
+  }>
 }
 
-export default function ServicePage({ params }: ServicePageProps) {
-  const service = SERVICE_CATEGORIES.find((s) => s.slug === params.slug)
-
-  if (!service) {
+export default async function ServicePage({ params }: ServicePageProps) {
+  const { slug } = await params
+  
+  // Find service in local categories for icon
+  const localService = SERVICE_CATEGORIES.find((s) => s.slug === slug)
+  if (!localService) {
     notFound()
   }
 
-  const Icon = iconMap[service.icon] || Home
+  // Fetch service from database
+  let service
+  let providers = []
+  let fetchError: string | null = null
+  
+  try {
+    service = await getServiceBySlug(slug)
+    if (service) {
+      providers = await getProvidersByCategory(service.id)
+    } else {
+      fetchError = 'Service category not found in database'
+    }
+  } catch (error) {
+    console.error('Error fetching service data:', error)
+    fetchError = error instanceof Error ? error.message : 'Unknown error'
+    // Fallback to local service data if DB fetch fails
+    service = null
+  }
+
+  const Icon = iconMap[localService.icon] || Home
+  const serviceName = service?.name || localService.name
+  const serviceDescription = service?.description || localService.description
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-4 py-16">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-12">
-            <div className="mb-4 flex justify-center">
-              <Icon className="w-20 h-20" strokeWidth={1.5} />
+      <Header />
+      
+      <main className="pt-24">
+        {/* Chef-specific hero with full-width image */}
+        {slug === 'chef-prive' && (
+          <section className="w-full">
+            <div className="w-full">
+              {/* Full-width image */}
+              <div className="overflow-hidden bg-black h-64 md:h-80">
+                <img
+                  src="/images/chef04.jpg"
+                  alt="Chef hero"
+                  className="w-full h-full object-cover"
+                />
+              </div>
             </div>
-            <h1 className="text-4xl md:text-5xl font-bold mb-4">{service.name}</h1>
-            <p className="text-xl text-muted-foreground">{service.description}</p>
-          </div>
+          </section>
+        )}
 
-          <Card className="mb-8">
-            <CardHeader>
-              <CardTitle>Service Details</CardTitle>
-              <CardDescription>
-                Learn more about our {service.name.toLowerCase()} services
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground mb-6">
-                Our {service.name.toLowerCase()} services are designed to provide you with the highest 
-                quality experience. We connect you with verified, 
-                professional service providers who are committed to excellence.
+        <div className="container mx-auto px-4 py-16">
+          {/* Service Header */}
+          <div className="mb-8">
+            <div className="text-center mb-12">
+              <div className="mb-4 flex justify-center">
+                <Icon className="w-20 h-20" strokeWidth={1.5} />
+              </div>
+              <h1
+                className="text-4xl md:text-5xl font-bold mb-4"
+                style={{ fontFamily: 'var(--font-grand-medium)' }}
+              >
+                {serviceName}
+              </h1>
+              <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+                {serviceDescription}
               </p>
-              <Button className="w-full md:w-auto">Book Now</Button>
-            </CardContent>
-          </Card>
-
-          <div className="text-center">
-            <Button variant="outline" asChild>
-              <a href="/">← Back to Services</a>
-            </Button>
+            </div>
           </div>
+
+          {/* Providers Section */}
+          {service ? (
+            <ProvidersList 
+              providers={providers} 
+              serviceCategoryId={service.id}
+              serviceSlug={slug}
+            />
+          ) : (
+            <Card>
+              <CardContent className="p-12 text-center">
+                <p className="text-muted-foreground mb-4">
+                  Service category not found in database.
+                </p>
+                <p className="text-sm text-muted-foreground mb-2">
+                  {fetchError && `Error: ${fetchError}`}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  Please run the migration script to create service categories in your Supabase database.
+                </p>
+                <div className="mt-4 text-xs text-muted-foreground">
+                  <p>Expected service slug: {slug}</p>
+                  <p>Providers found: {providers.length}</p>
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </div>
-      </div>
+      </main>
+
+      <Footer />
     </div>
   )
 }

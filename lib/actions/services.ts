@@ -30,7 +30,12 @@ export async function getServiceBySlug(slug: string) {
     .single()
 
   if (error) {
+    console.error(`Error fetching service by slug "${slug}":`, error)
     throw new Error(`Failed to fetch service: ${error.message}`)
+  }
+
+  if (data) {
+    console.log(`Found service: ${data.name} (ID: ${data.id})`)
   }
 
   return data
@@ -52,12 +57,15 @@ export async function getProvidersByCategory(categoryId: string) {
     `)
     .eq('service_category_id', categoryId)
     .eq('available', true)
+    .eq('status', 'approved')  // Explicitly filter by approved status
     .order('rating', { ascending: false })
 
   if (error) {
+    console.error('Error fetching providers:', error)
     throw new Error(`Failed to fetch providers: ${error.message}`)
   }
 
-  return data
+  console.log(`Found ${data?.length || 0} providers for category ${categoryId}`)
+  return data || []
 }
 
