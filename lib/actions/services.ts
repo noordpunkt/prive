@@ -69,3 +69,33 @@ export async function getProvidersByCategory(categoryId: string) {
   return data || []
 }
 
+export async function getProviderById(providerId: string) {
+  const supabase = await createClient()
+  
+  const { data, error } = await supabase
+    .from('service_providers')
+    .select(`
+      *,
+      service_category:service_categories (*),
+      profiles:profile_id (
+        id,
+        full_name,
+        avatar_url,
+        email,
+        phone,
+        location,
+        languages
+      )
+    `)
+    .eq('id', providerId)
+    .eq('status', 'approved')
+    .single()
+
+  if (error) {
+    console.error('Error fetching provider:', error)
+    throw new Error(`Failed to fetch provider: ${error.message}`)
+  }
+
+  return data
+}
+

@@ -92,10 +92,10 @@ export default function Home() {
                   </div>
                 )}
                 
-                {/* Service Title - use Grand-Medium */}
+                {/* Service Title - use Grand-Regular */}
                 <h3
                   className="text-4xl md:text-5xl font-bold mb-4 text-center text-black dark:text-white"
-                  style={{ fontFamily: 'var(--font-grand-medium)' }}
+                  style={{ fontFamily: 'var(--font-grand-regular)' }}
                 >
                   {service.name}
                 </h3>

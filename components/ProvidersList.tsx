@@ -181,7 +181,7 @@ export function ProvidersList({ providers: initialProviders, serviceCategoryId, 
               <Label>Price Range: €{priceRangeState[0]} - €{priceRangeState[1]}</Label>
               <Slider
                 value={priceRangeState}
-                onValueChange={setPriceRangeState}
+                onValueChange={(value) => setPriceRangeState([value[0], value[1]] as [number, number])}
                 min={0}
                 max={maxPrice}
                 step={10}
