@@ -80,13 +80,15 @@ export default function AdminProvidersPage() {
   useEffect(() => {
     if (modalOpen && editingField?.field === 'business_name' && titleInputRef.current) {
       setTimeout(() => {
-        titleInputRef.current?.focus()
-        // Only set selection range for text inputs, not number inputs
-        if (titleInputRef.current.type !== 'number') {
-          titleInputRef.current.setSelectionRange(
-            titleInputRef.current.value.length,
-            titleInputRef.current.value.length
-          )
+        if (titleInputRef.current) {
+          titleInputRef.current.focus()
+          // Only set selection range for text inputs, not number inputs
+          if (titleInputRef.current.type !== 'number') {
+            titleInputRef.current.setSelectionRange(
+              titleInputRef.current.value.length,
+              titleInputRef.current.value.length
+            )
+          }
         }
       }, 100)
     } else if (modalOpen && editingField) {
