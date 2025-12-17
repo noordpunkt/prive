@@ -131,7 +131,7 @@ export function UserMenu() {
     
     return (
       <div className="flex items-center gap-4">
-        <span className="text-sm font-semibold">
+        <span className="text-sm font-semibold" style={{ fontFamily: 'var(--font-au-bold)' }}>
           Hi {displayName}!
         </span>
         <SmallButton 

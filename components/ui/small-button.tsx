@@ -51,6 +51,7 @@ function SmallButton({
   loading = false,
   disabled,
   children,
+  style,
   ...props
 }: SmallButtonProps) {
   const Comp = asChild ? Slot : "button"
@@ -64,6 +65,7 @@ function SmallButton({
         loading && "relative",
         className
       )}
+      style={{ fontFamily: 'var(--font-au-regular)', ...style }}
       disabled={isDisabled}
       {...props}
     >

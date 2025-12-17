@@ -16,11 +16,11 @@ export default function Home() {
           <div className="relative z-10 text-center max-w-4xl mx-auto px-4">
             <h2
               className="text-5xl md:text-7xl lg:text-8xl mb-6"
-              style={{ fontFamily: 'var(--font-grand-regular)', fontWeight: 400 }}
+              style={{ fontFamily: 'var(--font-au-regular)' }}
             >
               Professionnels privés à la carte
             </h2>
-            <p className="text-xl md:text-2xl text-muted-foreground mb-12 max-w-2xl mx-auto">
+            <p className="text-xl md:text-2xl text-muted-foreground mb-12 max-w-2xl mx-auto" style={{ fontFamily: 'var(--font-au-light)' }}>
               Discover exceptional private services tailored to your lifestyle.
             </p>
             <div className="flex gap-4 justify-center">
@@ -92,10 +92,10 @@ export default function Home() {
                   </div>
                 )}
                 
-                {/* Service Title - use Grand-Regular */}
+                {/* Service Title */}
                 <h3
                   className="text-4xl md:text-5xl font-bold mb-4 text-center text-black dark:text-white"
-                  style={{ fontFamily: 'var(--font-grand-regular)' }}
+                  style={{ fontFamily: 'var(--font-au-bold)' }}
                 >
                   {service.name}
                 </h3>

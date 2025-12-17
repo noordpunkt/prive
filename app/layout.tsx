@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 
-// Custom font configuration - Using only 2 fonts
+// AB-Prive font for buttons (uppercase)
 const customFont = localFont({
   src: [
     {
@@ -21,30 +21,42 @@ const customFont = localFont({
   display: "swap",
 });
 
-// Grand-Medium font for service titles
-const grandMediumFont = localFont({
+// AU fonts for general text
+const auLightFont = localFont({
   src: [
     {
-      path: "../fonts/Grand-Medium.woff2",
-      weight: "500",
+      path: "../fonts/AU-Light.otf",
+      weight: "300",
       style: "normal",
     },
   ],
-  variable: "--font-grand-medium",
+  variable: "--font-au-light",
   fallback: ["system-ui", "arial"],
   display: "swap",
 });
 
-// Grand-Regular font for main hero title
-const grandRegularFont = localFont({
+const auRegularFont = localFont({
   src: [
     {
-      path: "../fonts/Grand-Regular.woff2",
+      path: "../fonts/AU-Regular.otf",
       weight: "400",
       style: "normal",
     },
   ],
-  variable: "--font-grand-regular",
+  variable: "--font-au-regular",
+  fallback: ["system-ui", "arial"],
+  display: "swap",
+});
+
+const auBoldFont = localFont({
+  src: [
+    {
+      path: "../fonts/AU-Bold.otf",
+      weight: "700",
+      style: "normal",
+    },
+  ],
+  variable: "--font-au-bold",
   fallback: ["system-ui", "arial"],
   display: "swap",
 });
@@ -62,7 +74,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${customFont.variable} ${grandMediumFont.variable} ${grandRegularFont.variable} antialiased`}
+        className={`${customFont.variable} ${auLightFont.variable} ${auRegularFont.variable} ${auBoldFont.variable} antialiased`}
       >
         {children}
       </body>

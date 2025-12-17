@@ -102,3 +102,4 @@ If you haven't already, consider enabling GitGuardian for your repository to pre
 
 **Remember**: Even if your repository is private, exposed keys in Git history can be accessed by anyone with repository access. Always rotate compromised keys.
 
+

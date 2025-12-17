@@ -42,11 +42,11 @@ export function ServiceCard({ service, index }: ServiceCardProps) {
             </div>
             <CardTitle
               className="text-2xl mb-3"
-              style={{ fontFamily: 'var(--font-grand-medium)' }}
+              style={{ fontFamily: 'var(--font-au-bold)' }}
             >
               {service.name}
             </CardTitle>
-            <CardDescription className="text-base">
+            <CardDescription className="text-base" style={{ fontFamily: 'var(--font-au-light)' }}>
               {service.description}
             </CardDescription>
           </CardHeader>

@@ -24,7 +24,7 @@ export async function createBooking(bookingData: {
   // Get provider to calculate price and verify availability
   const { data: provider, error: providerError } = await supabase
     .from('service_providers')
-    .select('hourly_rate, status, available, min_duration_hours, max_duration_hours')
+    .select('hourly_rate, status, available, total_hours')
     .eq('id', bookingData.provider_id)
     .single()
 
@@ -42,13 +42,9 @@ export async function createBooking(bookingData: {
     throw new Error('Provider is not currently available')
   }
 
-  // Validate duration
-  if (provider.min_duration_hours && bookingData.duration_hours < provider.min_duration_hours) {
-    throw new Error(`Minimum duration is ${provider.min_duration_hours} hours`)
-  }
-
-  if (provider.max_duration_hours && bookingData.duration_hours > provider.max_duration_hours) {
-    throw new Error(`Maximum duration is ${provider.max_duration_hours} hours`)
+  // Validate duration matches total_hours
+  if (provider.total_hours && bookingData.duration_hours !== provider.total_hours) {
+    throw new Error(`Duration must be exactly ${provider.total_hours} hours`)
   }
 
   // Create booking

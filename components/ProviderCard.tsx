@@ -61,14 +61,14 @@ export function ProviderCard({ provider, serviceSlug }: ProviderCardProps) {
             {/* Content below avatar */}
             <div className="pt-14 px-6 pb-6 flex flex-col flex-1">
               <div className="text-center mb-3">
-                <h3 className="font-semibold text-lg mb-1 truncate">{displayName}</h3>
+                <h3 className="font-semibold text-lg mb-1 truncate" style={{ fontFamily: 'var(--font-au-bold)' }}>{displayName}</h3>
                 <div className="flex items-center justify-center gap-2">
                   <div className="flex items-center gap-1">
                     <Star className="w-4 h-4 text-black dark:text-white" />
-                    <span className="text-sm font-medium">{rating.toFixed(1)}</span>
+                    <span className="text-sm font-medium" style={{ fontFamily: 'var(--font-au-regular)' }}>{rating.toFixed(1)}</span>
                   </div>
                   {reviews > 0 && (
-                    <span className="text-sm text-muted-foreground">
+                    <span className="text-sm text-muted-foreground" style={{ fontFamily: 'var(--font-au-light)' }}>
                       ({reviews} {reviews === 1 ? 'review' : 'reviews'})
                     </span>
                   )}
@@ -77,14 +77,14 @@ export function ProviderCard({ provider, serviceSlug }: ProviderCardProps) {
 
               {/* Bio */}
               {provider.bio && (
-                <p className="text-sm text-muted-foreground mb-4 text-center line-clamp-2">
+                <p className="text-sm text-muted-foreground mb-4 text-center line-clamp-2" style={{ fontFamily: 'var(--font-au-light)' }}>
                   {provider.bio}
                 </p>
               )}
 
               {/* Service Area */}
               {provider.service_area && provider.service_area.length > 0 && (
-                <div className="flex items-center justify-center gap-1 text-sm text-muted-foreground mb-4">
+                <div className="flex items-center justify-center gap-1 text-sm text-muted-foreground mb-4" style={{ fontFamily: 'var(--font-au-light)' }}>
                   <MapPin className="w-4 h-4" />
                   <span className="truncate">{provider.service_area.join(', ')}</span>
                 </div>
@@ -94,7 +94,7 @@ export function ProviderCard({ provider, serviceSlug }: ProviderCardProps) {
               <div className="mt-auto pt-4 border-t border-black/10 dark:border-white/10">
                 <div className="flex items-center justify-between mb-4">
                   <div>
-                    <div className="text-2xl font-bold">
+                    <div className="text-2xl font-bold" style={{ fontFamily: 'var(--font-au-bold)' }}>
                       €{provider.hourly_rate.toFixed(2)}
                     </div>
                   </div>
@@ -154,14 +154,14 @@ export function ProviderCard({ provider, serviceSlug }: ProviderCardProps) {
 
               {/* Name and Rating */}
               <div className="flex-1 min-w-0">
-                <h3 className="font-semibold text-lg mb-1 truncate">{displayName}</h3>
+                <h3 className="font-semibold text-lg mb-1 truncate" style={{ fontFamily: 'var(--font-au-bold)' }}>{displayName}</h3>
                 <div className="flex items-center gap-2">
                   <div className="flex items-center gap-1">
                     <Star className="w-4 h-4 text-black dark:text-white" />
-                    <span className="text-sm font-medium">{rating.toFixed(1)}</span>
+                    <span className="text-sm font-medium" style={{ fontFamily: 'var(--font-au-regular)' }}>{rating.toFixed(1)}</span>
                   </div>
                   {reviews > 0 && (
-                    <span className="text-sm text-muted-foreground">
+                    <span className="text-sm text-muted-foreground" style={{ fontFamily: 'var(--font-au-light)' }}>
                       ({reviews} {reviews === 1 ? 'review' : 'reviews'})
                     </span>
                   )}
@@ -171,14 +171,14 @@ export function ProviderCard({ provider, serviceSlug }: ProviderCardProps) {
 
             {/* Bio */}
             {provider.bio && (
-              <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
+              <p className="text-sm text-muted-foreground mb-4 line-clamp-2" style={{ fontFamily: 'var(--font-au-light)' }}>
                 {provider.bio}
               </p>
             )}
 
             {/* Service Area */}
             {provider.service_area && provider.service_area.length > 0 && (
-              <div className="flex items-center gap-1 text-sm text-muted-foreground mb-4">
+              <div className="flex items-center gap-1 text-sm text-muted-foreground mb-4" style={{ fontFamily: 'var(--font-au-light)' }}>
                 <MapPin className="w-4 h-4" />
                 <span className="truncate">{provider.service_area.join(', ')}</span>
               </div>
@@ -188,10 +188,10 @@ export function ProviderCard({ provider, serviceSlug }: ProviderCardProps) {
             <div className="mt-auto pt-4 border-t border-neutral-900/10">
               <div className="flex items-center justify-between mb-4">
                 <div>
-                  <div className="text-2xl font-bold">
+                  <div className="text-2xl font-bold" style={{ fontFamily: 'var(--font-au-bold)' }}>
                     €{provider.hourly_rate.toFixed(2)}
                   </div>
-                  <div className="text-sm text-muted-foreground">per hour</div>
+                  <div className="text-sm text-muted-foreground" style={{ fontFamily: 'var(--font-au-light)' }}>per hour</div>
                 </div>
                 {provider.available ? (
                   <span className="px-2 py-1 text-xs font-medium bg-neutral-900 text-white dark:bg-neutral-100 dark:text-black">

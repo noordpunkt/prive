@@ -100,11 +100,11 @@ export default async function ServicePage({ params }: ServicePageProps) {
               </div>
               <h1
                 className="text-4xl md:text-5xl font-bold mb-4"
-                style={{ fontFamily: 'var(--font-grand-medium)' }}
+                style={{ fontFamily: 'var(--font-au-bold)' }}
               >
                 {serviceName}
               </h1>
-              <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              <p className="text-xl text-muted-foreground max-w-2xl mx-auto" style={{ fontFamily: 'var(--font-au-light)' }}>
                 {serviceDescription}
               </p>
             </div>
@@ -120,16 +120,16 @@ export default async function ServicePage({ params }: ServicePageProps) {
           ) : (
             <Card>
               <CardContent className="p-12 text-center">
-                <p className="text-muted-foreground mb-4">
+                <p className="text-muted-foreground mb-4" style={{ fontFamily: 'var(--font-au-regular)' }}>
                   Service category not found in database.
                 </p>
-                <p className="text-sm text-muted-foreground mb-2">
+                <p className="text-sm text-muted-foreground mb-2" style={{ fontFamily: 'var(--font-au-light)' }}>
                   {fetchError && `Error: ${fetchError}`}
                 </p>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-sm text-muted-foreground" style={{ fontFamily: 'var(--font-au-light)' }}>
                   Please run the migration script to create service categories in your Supabase database.
                 </p>
-                <div className="mt-4 text-xs text-muted-foreground">
+                <div className="mt-4 text-xs text-muted-foreground" style={{ fontFamily: 'var(--font-au-light)' }}>
                   <p>Expected service slug: {slug}</p>
                   <p>Providers found: {providers.length}</p>
                 </div>

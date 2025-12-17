@@ -40,10 +40,10 @@ export default function BookPage() {
       try {
         const providerData = await getProviderById(providerId)
         setProvider(providerData)
-        // Set default duration to 1 hour
+        // Set default duration to provider's total_hours or 2 hours
         setFormData(prev => ({
           ...prev,
-          duration_hours: 1
+          duration_hours: providerData?.total_hours || 2
         }))
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load provider')
@@ -156,12 +156,12 @@ export default function BookPage() {
           <div className="mb-8">
             <h1
               className="text-4xl md:text-5xl font-bold mb-4"
-              style={{ fontFamily: 'var(--font-grand-medium)' }}
+              style={{ fontFamily: 'var(--font-au-bold)' }}
             >
               Book {displayName}
             </h1>
             {provider.service_category && (
-              <p className="text-xl text-muted-foreground mb-6">
+              <p className="text-xl text-muted-foreground mb-6" style={{ fontFamily: 'var(--font-au-light)' }}>
                 {provider.service_category.name}
               </p>
             )}

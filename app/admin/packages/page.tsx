@@ -119,11 +119,11 @@ export default function AdminPackagesPage() {
             <div>
               <h1
                 className="text-4xl md:text-5xl font-bold mb-4"
-                style={{ fontFamily: 'var(--font-grand-medium)' }}
+                style={{ fontFamily: 'var(--font-au-bold)' }}
               >
                 Manage Service Packages
               </h1>
-              <p className="text-xl text-muted-foreground">
+              <p className="text-xl text-muted-foreground" style={{ fontFamily: 'var(--font-au-light)' }}>
                 View and manage all service packages
               </p>
             </div>
@@ -144,10 +144,10 @@ export default function AdminPackagesPage() {
           {packages.length === 0 ? (
             <Card className="shadow-none">
               <CardContent className="p-12 text-center">
-                <p className="text-muted-foreground text-lg">
+                <p className="text-muted-foreground text-lg" style={{ fontFamily: 'var(--font-au-regular)' }}>
                   No service packages found
                 </p>
-                <p className="text-sm text-muted-foreground mt-2">
+                <p className="text-sm text-muted-foreground mt-2" style={{ fontFamily: 'var(--font-au-light)' }}>
                   Service packages will appear here once created
                 </p>
               </CardContent>
@@ -173,26 +173,26 @@ export default function AdminPackagesPage() {
                     <CardContent className="p-6">
                       <h3
                         className="text-xl font-bold mb-2"
-                        style={{ fontFamily: 'var(--font-grand-medium)' }}
+                        style={{ fontFamily: 'var(--font-au-bold)' }}
                       >
                         {pkg.title}
                       </h3>
-                      <p className="text-sm text-muted-foreground mb-4">
+                      <p className="text-sm text-muted-foreground mb-4" style={{ fontFamily: 'var(--font-au-light)' }}>
                         Provider: {providerName}
                       </p>
                       <div className="space-y-2 mb-4">
                         <div className="flex items-center gap-2">
                           <Euro className="w-4 h-4 text-muted-foreground" />
-                          <span className="font-semibold">
+                          <span className="font-semibold" style={{ fontFamily: 'var(--font-au-bold)' }}>
                             €{Math.round(pkg.price_per_person || 0)} /personne
                           </span>
                         </div>
-                        <p className="text-sm text-muted-foreground">
+                        <p className="text-sm text-muted-foreground" style={{ fontFamily: 'var(--font-au-light)' }}>
                           Prix minimum: €{Math.round(pkg.minimum_price || pkg.price_per_person || 0)}
                         </p>
                       </div>
                       {pkg.description && (
-                        <p className="text-sm text-muted-foreground line-clamp-3 mb-4">
+                        <p className="text-sm text-muted-foreground line-clamp-3 mb-4" style={{ fontFamily: 'var(--font-au-light)' }}>
                           {pkg.description}
                         </p>
                       )}

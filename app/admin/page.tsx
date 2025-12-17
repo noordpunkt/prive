@@ -22,11 +22,11 @@ export default async function AdminPage() {
           <div className="mb-8">
             <h1
               className="text-4xl md:text-5xl font-bold mb-4"
-              style={{ fontFamily: 'var(--font-grand-medium)' }}
+              style={{ fontFamily: 'var(--font-au-bold)' }}
             >
               Admin Dashboard
             </h1>
-            <p className="text-xl text-muted-foreground">
+            <p className="text-xl text-muted-foreground" style={{ fontFamily: 'var(--font-au-light)' }}>
               Manage profiles, providers, and upload photos
             </p>
           </div>
@@ -37,7 +37,7 @@ export default async function AdminPage() {
               <CardContent className="p-6">
                 <h2
                   className="text-2xl font-bold mb-4"
-                  style={{ fontFamily: 'var(--font-grand-medium)' }}
+                  style={{ fontFamily: 'var(--font-au-bold)' }}
                 >
                   Profiles
                 </h2>
@@ -55,7 +55,7 @@ export default async function AdminPage() {
               <CardContent className="p-6">
                 <h2
                   className="text-2xl font-bold mb-4"
-                  style={{ fontFamily: 'var(--font-grand-medium)' }}
+                  style={{ fontFamily: 'var(--font-au-bold)' }}
                 >
                   Providers
                 </h2>
@@ -73,7 +73,7 @@ export default async function AdminPage() {
               <CardContent className="p-6">
                 <h2
                   className="text-2xl font-bold mb-4"
-                  style={{ fontFamily: 'var(--font-grand-medium)' }}
+                  style={{ fontFamily: 'var(--font-au-bold)' }}
                 >
                   Service Packages
                 </h2>

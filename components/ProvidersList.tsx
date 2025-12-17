@@ -113,10 +113,10 @@ export function ProvidersList({ providers: initialProviders, serviceCategoryId, 
   if (initialProviders.length === 0) {
     return (
       <div className="text-center py-12">
-        <p className="text-muted-foreground text-lg mb-4">
+        <p className="text-muted-foreground text-lg mb-4" style={{ fontFamily: 'var(--font-au-regular)' }}>
           No providers available for this service yet.
         </p>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-sm text-muted-foreground" style={{ fontFamily: 'var(--font-au-light)' }}>
           Check back soon or contact us to become a provider.
         </p>
       </div>
@@ -162,7 +162,7 @@ export function ProvidersList({ providers: initialProviders, serviceCategoryId, 
         {showFilters && (
           <div className="border border-black/10 dark:border-white/10 p-4 space-y-4 bg-white dark:bg-black">
             <div className="flex items-center justify-between">
-              <h3 className="font-semibold">Filters</h3>
+              <h3 className="font-semibold" style={{ fontFamily: 'var(--font-au-bold)' }}>Filters</h3>
               {hasActiveFilters && (
                 <Button
                   variant="ghost"
@@ -237,7 +237,7 @@ export function ProvidersList({ providers: initialProviders, serviceCategoryId, 
               <SelectItem value="price-high">Price: High to Low</SelectItem>
             </SelectContent>
           </Select>
-          <div className="ml-auto text-sm text-muted-foreground">
+          <div className="ml-auto text-sm text-muted-foreground" style={{ fontFamily: 'var(--font-au-light)' }}>
             {filteredProviders.length} {filteredProviders.length === 1 ? 'provider' : 'providers'} found
           </div>
         </div>
@@ -246,7 +246,7 @@ export function ProvidersList({ providers: initialProviders, serviceCategoryId, 
       {/* Providers Grid */}
       {filteredProviders.length === 0 ? (
         <div className="text-center py-12">
-          <p className="text-muted-foreground mb-2">No providers match your filters.</p>
+          <p className="text-muted-foreground mb-2" style={{ fontFamily: 'var(--font-au-regular)' }}>No providers match your filters.</p>
           <Button variant="outline" onClick={clearFilters}>
             Clear filters
           </Button>

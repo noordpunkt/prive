@@ -93,14 +93,14 @@ export default async function ProviderPage({ params }: ProviderPageProps) {
                 {/* Title: "[Service] par [Name]" */}
                 <h1
                   className="text-3xl md:text-4xl font-bold leading-tight"
-                  style={{ fontFamily: 'var(--font-grand-medium)' }}
+                  style={{ fontFamily: 'var(--font-au-bold)' }}
                 >
                   {serviceCategory?.name || 'Service'} par {firstName}
                 </h1>
 
                 {/* Description */}
                 {provider.bio && (
-                  <p className="text-base text-muted-foreground leading-relaxed">
+                  <p className="text-base text-muted-foreground leading-relaxed" style={{ fontFamily: 'var(--font-au-light)' }}>
                     {provider.bio}
                   </p>
                 )}
@@ -109,25 +109,25 @@ export default async function ProviderPage({ params }: ProviderPageProps) {
                 <div className="flex flex-wrap items-center gap-2 text-sm">
                   <div className="flex items-center gap-1">
                     <Star className="w-4 h-4 text-black dark:text-white fill-current" />
-                    <span className="font-semibold">{rating.toFixed(1)}</span>
+                    <span className="font-semibold" style={{ fontFamily: 'var(--font-au-bold)' }}>{rating.toFixed(1)}</span>
                   </div>
                   {totalReviews > 0 && (
-                    <span className="text-muted-foreground">
+                    <span className="text-muted-foreground" style={{ fontFamily: 'var(--font-au-light)' }}>
                       {totalReviews} {totalReviews === 1 ? 'évaluation' : 'évaluations'}
                     </span>
                   )}
                   {provider.service_area && provider.service_area.length > 0 && (
                     <>
-                      <span className="text-muted-foreground">•</span>
-                      <span className="text-muted-foreground">
+                      <span className="text-muted-foreground" style={{ fontFamily: 'var(--font-au-light)' }}>•</span>
+                      <span className="text-muted-foreground" style={{ fontFamily: 'var(--font-au-light)' }}>
                         {provider.service_area[0]}
                       </span>
                     </>
                   )}
                   {serviceCategory && (
                     <>
-                      <span className="text-muted-foreground">:</span>
-                      <span className="text-muted-foreground">
+                      <span className="text-muted-foreground" style={{ fontFamily: 'var(--font-au-light)' }}>:</span>
+                      <span className="text-muted-foreground" style={{ fontFamily: 'var(--font-au-light)' }}>
                         {serviceCategory.name}
                       </span>
                     </>
@@ -135,20 +135,20 @@ export default async function ProviderPage({ params }: ProviderPageProps) {
                 </div>
 
                 {/* Service Location Info */}
-                <p className="text-sm text-muted-foreground">
+                <p className="text-sm text-muted-foreground" style={{ fontFamily: 'var(--font-au-light)' }}>
                   Service proposé dans votre logement
                 </p>
 
                 {/* Pricing and Booking */}
                 <div className="pt-4 border-t border-black/10 dark:border-white/10">
                   <div className="space-y-2 mb-6">
-                    <p className="text-lg font-semibold">
+                    <p className="text-lg font-semibold" style={{ fontFamily: 'var(--font-au-bold)' }}>
                       À partir de €{Math.round(minPrice)} par voyageur
                     </p>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-sm text-muted-foreground" style={{ fontFamily: 'var(--font-au-light)' }}>
                       Prix minimum de €{Math.round(minPrice)} pour réserver
                     </p>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-sm text-muted-foreground" style={{ fontFamily: 'var(--font-au-light)' }}>
                       Annulation gratuite
                     </p>
                   </div>
@@ -181,20 +181,20 @@ export default async function ProviderPage({ params }: ProviderPageProps) {
                     <CardContent className="p-6">
                       <h3
                         className="text-xl font-bold mb-3"
-                        style={{ fontFamily: 'var(--font-grand-medium)' }}
+                        style={{ fontFamily: 'var(--font-au-bold)' }}
                       >
                         {pkg.title}
                       </h3>
                       <div className="space-y-2 mb-4">
-                        <p className="text-base font-semibold">
+                        <p className="text-base font-semibold" style={{ fontFamily: 'var(--font-au-bold)' }}>
                           €{Math.round(pkg.price_per_person || pkg.minimum_price || 0)} /personne
                         </p>
-                        <p className="text-sm text-muted-foreground">
+                        <p className="text-sm text-muted-foreground" style={{ fontFamily: 'var(--font-au-light)' }}>
                           Prix minimum de €{Math.round(pkg.minimum_price || pkg.price_per_person || 0)} pour réserver
                         </p>
                       </div>
                       {pkg.description && (
-                        <p className="text-sm text-muted-foreground leading-relaxed">
+                        <p className="text-sm text-muted-foreground leading-relaxed" style={{ fontFamily: 'var(--font-au-light)' }}>
                           {pkg.description}
                         </p>
                       )}
@@ -214,7 +214,7 @@ export default async function ProviderPage({ params }: ProviderPageProps) {
                   <CardContent className="p-6">
                     <h3
                       className="text-xl font-bold mb-3"
-                      style={{ fontFamily: 'var(--font-grand-medium)' }}
+                      style={{ fontFamily: 'var(--font-au-bold)' }}
                     >
                       {serviceCategory?.name || 'Service'}
                     </h3>
@@ -242,7 +242,7 @@ export default async function ProviderPage({ params }: ProviderPageProps) {
             <div className="mt-16 pt-8 border-t border-black/10 dark:border-white/10">
               <h2
                 className="text-3xl font-bold mb-6"
-                style={{ fontFamily: 'var(--font-grand-medium)' }}
+                style={{ fontFamily: 'var(--font-au-bold)' }}
               >
                 Évaluations
               </h2>
@@ -264,7 +264,7 @@ export default async function ProviderPage({ params }: ProviderPageProps) {
                         )}
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-2">
-                            <span className="font-semibold">
+                            <span className="font-semibold" style={{ fontFamily: 'var(--font-au-bold)' }}>
                               {review.customer?.full_name || 'Anonymous'}
                             </span>
                             <div className="flex items-center gap-1">
@@ -281,10 +281,10 @@ export default async function ProviderPage({ params }: ProviderPageProps) {
                             </div>
                           </div>
                           {review.comment && (
-                            <p className="text-muted-foreground">{review.comment}</p>
+                            <p className="text-muted-foreground" style={{ fontFamily: 'var(--font-au-light)' }}>{review.comment}</p>
                           )}
                           {review.created_at && (
-                            <p className="text-sm text-muted-foreground mt-2">
+                            <p className="text-sm text-muted-foreground mt-2" style={{ fontFamily: 'var(--font-au-light)' }}>
                               {new Date(review.created_at).toLocaleDateString('fr-FR')}
                             </p>
                           )}

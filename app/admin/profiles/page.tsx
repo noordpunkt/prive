@@ -248,11 +248,11 @@ export default function AdminProfilesPage() {
             <div>
               <h1
                 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4"
-                style={{ fontFamily: 'var(--font-grand-medium)' }}
+                style={{ fontFamily: 'var(--font-au-bold)' }}
               >
                 Manage Profiles
               </h1>
-              <p className="text-lg md:text-xl text-muted-foreground">
+              <p className="text-lg md:text-xl text-muted-foreground" style={{ fontFamily: 'var(--font-au-light)' }}>
                 Upload profile pictures and manage user profiles
               </p>
             </div>

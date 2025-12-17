@@ -164,7 +164,7 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
           {success ? (
             // Success state - only show centered message
             <div className="flex-1 flex items-center justify-center">
-              <p className="text-lg text-center font-semibold">
+              <p className="text-lg text-center font-semibold" style={{ fontFamily: 'var(--font-au-bold)' }}>
                 {successMessage}
               </p>
             </div>
@@ -177,7 +177,7 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
               </TabsList>
 
               {error && (
-                <div className="p-3 text-sm bg-destructive/10 text-destructive border border-destructive/20 mb-6">
+                <div className="p-3 text-sm bg-destructive/10 text-destructive border border-destructive/20 mb-6" style={{ fontFamily: 'var(--font-au-regular)' }}>
                   {error}
                 </div>
               )}
