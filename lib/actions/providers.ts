@@ -428,7 +428,7 @@ export async function deleteProviderImage(providerId: string, imageUrl: string) 
   }
 
   // Remove image from array
-  const updatedImages = currentImages.filter((url) => url !== imageUrl)
+  const updatedImages = currentImages.filter((url: string) => url !== imageUrl)
 
   // Update cover_image_index if needed
   let coverIndex = provider.cover_image_index
