@@ -169,7 +169,7 @@ export default function AdminProvidersPage() {
       
       if (field === 'service_area') {
         // Parse comma-separated locations into array
-        const locations = value
+        const locations = String(value)
           .split(',')
           .map(loc => loc.trim())
           .filter(loc => loc.length > 0)
