@@ -80,7 +80,7 @@ export interface Database {
           service_category_id: string
           business_name: string | null
           bio: string | null
-          hourly_rate: number | null
+          price: number | null
           rating: number
           total_reviews: number
           verified: boolean
@@ -94,7 +94,7 @@ export interface Database {
           service_category_id: string
           business_name?: string | null
           bio?: string | null
-          hourly_rate?: number | null
+          price?: number | null
           rating?: number
           total_reviews?: number
           verified?: boolean
@@ -108,7 +108,7 @@ export interface Database {
           service_category_id?: string
           business_name?: string | null
           bio?: string | null
-          hourly_rate?: number | null
+          price?: number | null
           rating?: number
           total_reviews?: number
           verified?: boolean

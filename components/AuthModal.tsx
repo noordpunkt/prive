@@ -85,9 +85,9 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
       // Wait a bit more for UserMenu to update
       await new Promise(resolve => setTimeout(resolve, 500))
       
-      // Close modal and refresh
+      // Close modal and redirect to onboarding
       onOpenChange(false)
-      router.refresh()
+      router.push('/onboarding')
     } catch (err: any) {
       setError(err.message || 'Failed to create account')
       setLoading(false)
@@ -190,7 +190,6 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
                       id="name"
                       value={signUpData.name}
                       onChange={(e) => setSignUpData({ ...signUpData, name: e.target.value })}
-                      className="bg-white/5 backdrop-blur-sm border-white/10"
                       disabled={loading}
                       required
                     />
@@ -203,7 +202,6 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
                       type="email"
                       value={signUpData.email}
                       onChange={(e) => setSignUpData({ ...signUpData, email: e.target.value })}
-                      className="bg-white/5 backdrop-blur-sm border-white/10"
                       disabled={loading}
                       required
                     />
@@ -216,7 +214,6 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
                       type="password"
                       value={signUpData.password}
                       onChange={(e) => setSignUpData({ ...signUpData, password: e.target.value })}
-                      className="bg-white/5 backdrop-blur-sm border-white/10"
                       disabled={loading}
                       required
                       minLength={6}
@@ -238,7 +235,6 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
                       type="email"
                       value={signInData.email}
                       onChange={(e) => setSignInData({ ...signInData, email: e.target.value })}
-                      className="bg-white/5 backdrop-blur-sm border-white/10"
                       disabled={loading}
                       required
                     />
@@ -251,7 +247,6 @@ export function AuthModal({ open, onOpenChange }: AuthModalProps) {
                       type="password"
                       value={signInData.password}
                       onChange={(e) => setSignInData({ ...signInData, password: e.target.value })}
-                      className="bg-white/5 backdrop-blur-sm border-white/10"
                       disabled={loading}
                       required
                     />

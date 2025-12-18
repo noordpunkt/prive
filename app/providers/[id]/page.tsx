@@ -3,7 +3,7 @@ import { Header } from '@/components/Header'
 import { Footer } from '@/components/Footer'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
-import { Star, MapPin } from 'lucide-react'
+import { MapPin } from 'lucide-react'
 import { getProviderById, getServicePackagesByProvider } from '@/lib/actions/services'
 import { getReviewsByProvider } from '@/lib/actions/reviews'
 import Link from 'next/link'
@@ -44,25 +44,25 @@ export default async function ProviderPage({ params }: ProviderPageProps) {
   const totalReviews = provider.total_reviews || 0
   const serviceCategory = provider.service_category
   
-  // Get hero image from portfolio_images or use default chef image
+  // Get hero image from portfolio_images using cover_image_index, or use first image, or default
+  const coverIndex = provider.cover_image_index ?? 0
   const heroImage = provider.portfolio_images && provider.portfolio_images.length > 0
-    ? provider.portfolio_images[0]
+    ? provider.portfolio_images[coverIndex] || provider.portfolio_images[0]
     : '/images/chef01.jpg'
   
-  // Calculate minimum price from packages or use hourly_rate
+  // Get price from packages or use fixed service price
   const minPrice = servicePackages.length > 0
     ? Math.min(...servicePackages.map(pkg => pkg.price_per_person || pkg.minimum_price || 0))
-    : (provider.hourly_rate || 0)
+    : (provider.price || 0)
 
   return (
     <div className="min-h-screen bg-background">
       <Header />
       
-      <main className="pt-24">
-        <div className="container mx-auto px-4 py-8 max-w-7xl">
-          <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_1fr] gap-8 lg:gap-12">
-            {/* Left Panel - Provider Profile */}
-            <div className="space-y-6">
+      <main className="pt-24 pb-32">
+        <div className="container mx-auto px-4 py-8 max-w-4xl">
+          {/* Provider Profile */}
+          <div className="space-y-6">
               {/* Hero Image with Overlapping Avatar */}
               <div className="relative w-full aspect-[4/3] bg-black">
                 <div className="absolute inset-0 overflow-hidden">
@@ -108,7 +108,7 @@ export default async function ProviderPage({ params }: ProviderPageProps) {
                 {/* Rating and Location - Single Line */}
                 <div className="flex flex-wrap items-center gap-2 text-sm">
                   <div className="flex items-center gap-1">
-                    <Star className="w-4 h-4 text-black dark:text-white fill-current" />
+                    <span className="text-lg text-black dark:text-white" style={{ fontFamily: 'var(--font-au-bold)' }}>ꕤ</span>
                     <span className="font-semibold" style={{ fontFamily: 'var(--font-au-bold)' }}>{rating.toFixed(1)}</span>
                   </div>
                   {totalReviews > 0 && (
@@ -134,107 +134,7 @@ export default async function ProviderPage({ params }: ProviderPageProps) {
                   )}
                 </div>
 
-                {/* Service Location Info */}
-                <p className="text-sm text-muted-foreground" style={{ fontFamily: 'var(--font-au-light)' }}>
-                  Service proposé dans votre logement
-                </p>
-
-                {/* Pricing and Booking */}
-                <div className="pt-4 border-t border-black/10 dark:border-white/10">
-                  <div className="space-y-2 mb-6">
-                    <p className="text-lg font-semibold" style={{ fontFamily: 'var(--font-au-bold)' }}>
-                      À partir de €{Math.round(minPrice)} par voyageur
-                    </p>
-                    <p className="text-sm text-muted-foreground" style={{ fontFamily: 'var(--font-au-light)' }}>
-                      Prix minimum de €{Math.round(minPrice)} pour réserver
-                    </p>
-                    <p className="text-sm text-muted-foreground" style={{ fontFamily: 'var(--font-au-light)' }}>
-                      Annulation gratuite
-                    </p>
-                  </div>
-                  <Button 
-                    size="lg" 
-                    asChild 
-                    disabled={!provider.available}
-                    className="w-full"
-                  >
-                    <Link href={`/book/${id}`}>
-                      Voir les dates
-                    </Link>
-                  </Button>
-                </div>
               </div>
-            </div>
-
-            {/* Right Panel - Service Packages */}
-            <div className="space-y-6">
-              {servicePackages.length > 0 ? (
-                servicePackages.map((pkg: any) => (
-                  <Card key={pkg.id} className="shadow-none overflow-hidden border-black/10 dark:border-white/10">
-                    <div className="relative w-full aspect-[4/3] overflow-hidden bg-black">
-                      <img
-                        src={pkg.image_url || heroImage}
-                        alt={pkg.title}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                    <CardContent className="p-6">
-                      <h3
-                        className="text-xl font-bold mb-3"
-                        style={{ fontFamily: 'var(--font-au-bold)' }}
-                      >
-                        {pkg.title}
-                      </h3>
-                      <div className="space-y-2 mb-4">
-                        <p className="text-base font-semibold" style={{ fontFamily: 'var(--font-au-bold)' }}>
-                          €{Math.round(pkg.price_per_person || pkg.minimum_price || 0)} /personne
-                        </p>
-                        <p className="text-sm text-muted-foreground" style={{ fontFamily: 'var(--font-au-light)' }}>
-                          Prix minimum de €{Math.round(pkg.minimum_price || pkg.price_per_person || 0)} pour réserver
-                        </p>
-                      </div>
-                      {pkg.description && (
-                        <p className="text-sm text-muted-foreground leading-relaxed" style={{ fontFamily: 'var(--font-au-light)' }}>
-                          {pkg.description}
-                        </p>
-                      )}
-                    </CardContent>
-                  </Card>
-                ))
-              ) : (
-                // Fallback: Show single service if no packages
-                <Card className="shadow-none overflow-hidden border-black/10 dark:border-white/10">
-                  <div className="relative w-full aspect-[4/3] overflow-hidden bg-black">
-                    <img
-                      src={heroImage}
-                      alt={serviceCategory?.name || 'Service'}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <CardContent className="p-6">
-                    <h3
-                      className="text-xl font-bold mb-3"
-                      style={{ fontFamily: 'var(--font-au-bold)' }}
-                    >
-                      {serviceCategory?.name || 'Service'}
-                    </h3>
-                    <div className="space-y-2 mb-4">
-                      <p className="text-base font-semibold">
-                        €{Math.round(provider.hourly_rate || 0)} /personne
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        Prix minimum de €{Math.round(provider.hourly_rate || 0)} pour réserver
-                      </p>
-                    </div>
-                    {provider.bio && (
-                      <p className="text-sm text-muted-foreground leading-relaxed">
-                        {provider.bio}
-                      </p>
-                    )}
-                  </CardContent>
-                </Card>
-              )}
-            </div>
           </div>
 
           {/* Reviews Section */}
@@ -269,14 +169,16 @@ export default async function ProviderPage({ params }: ProviderPageProps) {
                             </span>
                             <div className="flex items-center gap-1">
                               {[...Array(5)].map((_, i) => (
-                                <Star
+                                <span
                                   key={i}
-                                  className={`w-4 h-4 ${
+                                  className={`text-base ${
                                     i < review.rating
-                                      ? 'text-black dark:text-white fill-current'
-                                      : 'text-muted-foreground'
+                                      ? 'text-black dark:text-white'
+                                      : 'text-muted-foreground opacity-30'
                                   }`}
-                                />
+                                >
+                                  ꕤ
+                                </span>
                               ))}
                             </div>
                           </div>
@@ -299,7 +201,30 @@ export default async function ProviderPage({ params }: ProviderPageProps) {
         </div>
       </main>
 
-      <Footer />
+      {/* Fixed Bottom Full Width Booking Section */}
+      <div className="fixed bottom-0 left-0 right-0 z-50 border-t bg-background/95 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60">
+        <div className="container mx-auto px-4 py-4 lg:py-6">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 max-w-4xl mx-auto">
+            <p className="text-2xl font-bold font-mono" style={{ fontFamily: 'var(--font-source-code-pro)' }}>
+              €{Math.round(minPrice)}
+            </p>
+            <Button 
+              size="lg" 
+              asChild 
+              disabled={!provider.available}
+              className="w-full sm:w-auto min-w-[200px]"
+            >
+              <Link href={`/book/${id}`}>
+                Book now
+              </Link>
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      <div className="pb-24 lg:pb-28">
+        <Footer />
+      </div>
     </div>
   )
 }

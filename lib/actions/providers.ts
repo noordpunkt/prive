@@ -7,7 +7,7 @@ export interface ProviderApplicationData {
   service_category_id: string
   business_name?: string
   bio?: string
-  hourly_rate: number
+  price: number
   total_hours?: number
   service_area?: string[]
   portfolio_images?: string[]
@@ -276,7 +276,7 @@ export async function reviewProviderApplication(
         service_category_id: application.service_category_id,
         business_name: applicationData.business_name || null,
         bio: applicationData.bio || null,
-        hourly_rate: applicationData.hourly_rate,
+        price: applicationData.price,
         total_hours: applicationData.total_hours || 2.0,
         service_area: applicationData.service_area || null,
         portfolio_images: applicationData.portfolio_images || null,
@@ -296,10 +296,11 @@ export async function reviewProviderApplication(
 }
 
 /**
- * Upload provider image to Supabase Storage
- * Admin only - can upload images for any provider
+ * Add provider image URL to database
+ * Admin only - adds an already-uploaded image URL to the provider's portfolio
+ * This is called after the file is uploaded directly to Supabase Storage from the client
  */
-export async function uploadProviderImage(providerId: string, file: File) {
+export async function addProviderImageUrl(providerId: string, imageUrl: string) {
   const supabase = await createClient()
   
   // Get current user
@@ -319,17 +320,6 @@ export async function uploadProviderImage(providerId: string, file: File) {
     throw new Error('Unauthorized - Admin access required')
   }
 
-  // Validate file type
-  const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
-  if (!validTypes.includes(file.type)) {
-    throw new Error('Invalid file type. Please upload a JPEG, PNG, WebP, or GIF image.')
-  }
-
-  // Validate file size (max 5MB)
-  if (file.size > 5 * 1024 * 1024) {
-    throw new Error('File size too large. Maximum size is 5MB.')
-  }
-
   // Get current provider to check image count
   const { data: provider, error: providerError } = await supabase
     .from('service_providers')
@@ -346,30 +336,8 @@ export async function uploadProviderImage(providerId: string, file: File) {
     throw new Error('Maximum 6 images allowed per provider')
   }
 
-  // Create a unique filename
-  const fileExt = file.name.split('.').pop()
-  const fileName = `${providerId}-${Date.now()}.${fileExt}`
-  const filePath = `${providerId}/${fileName}`
-
-  // Upload to Supabase Storage
-  const { data, error } = await supabase.storage
-    .from('provider-images')
-    .upload(filePath, file, {
-      cacheControl: '3600',
-      upsert: false
-    })
-
-  if (error) {
-    throw new Error(`Failed to upload: ${error.message}`)
-  }
-
-  // Get public URL
-  const { data: { publicUrl } } = supabase.storage
-    .from('provider-images')
-    .getPublicUrl(filePath)
-
   // Add new image to portfolio_images array
-  const updatedImages = [...currentImages, publicUrl]
+  const updatedImages = [...currentImages, imageUrl]
 
   // Update provider with new image URL
   const { error: updateError } = await supabase
@@ -382,7 +350,16 @@ export async function uploadProviderImage(providerId: string, file: File) {
   }
 
   revalidatePath('/admin/providers')
-  return publicUrl
+  return imageUrl
+}
+
+/**
+ * @deprecated Use direct client-side upload to Supabase Storage instead
+ * This function is kept for backward compatibility but uploads should be done client-side
+ */
+export async function uploadProviderImage(providerId: string, file: File) {
+  // This is now a wrapper that throws an error to encourage client-side uploads
+  throw new Error('Please use client-side upload to Supabase Storage. This function is deprecated.')
 }
 
 /**

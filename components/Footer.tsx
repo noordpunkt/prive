@@ -1,23 +1,30 @@
 import { ThemeToggle } from '@/components/ThemeToggle'
 import Link from 'next/link'
+import { SERVICE_CATEGORIES } from '@/types/services'
 
 export function Footer() {
+  // Filter out "Coiffeur Privé" and dynamically list all other services
+  const footerServices = SERVICE_CATEGORIES.filter(
+    service => service.slug !== 'coiffeur-prive'
+  )
+
   return (
     <footer className="border-t mt-24">
       <div className="container mx-auto px-4 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
-            <h3 className="font-semibold mb-4" style={{ fontFamily: 'var(--font-au-bold)' }}>Privé à la Carte</h3>
-            <p className="text-sm text-muted-foreground" style={{ fontFamily: 'var(--font-au-light)' }}>
-              Your gateway to premium services à la carte.
-            </p>
+            <h3 className="font-semibold mb-4" style={{ fontFamily: 'var(--font-au-bold)' }}>Les Collectionneurs.</h3>
           </div>
           <div>
             <h4 className="font-semibold mb-4" style={{ fontFamily: 'var(--font-au-bold)' }}>Services</h4>
             <ul className="space-y-2 text-sm text-muted-foreground" style={{ fontFamily: 'var(--font-au-light)' }}>
-              <li><Link href="/services" className="hover:text-foreground">All Services</Link></li>
-              <li><Link href="/services/chef-prive" className="hover:text-foreground">Chef Privé</Link></li>
-              <li><Link href="/services/coiffeur-prive" className="hover:text-foreground">Coiffeur Privé</Link></li>
+              {footerServices.map((service) => (
+                <li key={service.id}>
+                  <Link href={`/services/${service.slug}`} className="hover:text-foreground">
+                    {service.name}
+                  </Link>
+                </li>
+              ))}
             </ul>
           </div>
           <div>
@@ -39,7 +46,7 @@ export function Footer() {
         <div className="mt-12 pt-8 border-t">
           <div className="flex items-center justify-between flex-col md:flex-row gap-4">
             <p className="text-sm text-muted-foreground" style={{ fontFamily: 'var(--font-au-light)' }}>
-              &copy; {new Date().getFullYear()} Privé à la Carte. All rights reserved.
+              &copy; {new Date().getFullYear()} Les Collectionneurs. All rights reserved.
             </p>
             <div className="flex items-center gap-2">
               <span className="text-sm text-muted-foreground" style={{ fontFamily: 'var(--font-au-light)' }}>Theme:</span>

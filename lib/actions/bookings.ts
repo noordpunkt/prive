@@ -24,7 +24,7 @@ export async function createBooking(bookingData: {
   // Get provider to calculate price and verify availability
   const { data: provider, error: providerError } = await supabase
     .from('service_providers')
-    .select('hourly_rate, status, available, total_hours')
+    .select('price, status, available, total_hours')
     .eq('id', bookingData.provider_id)
     .single()
 
@@ -32,7 +32,8 @@ export async function createBooking(bookingData: {
     throw new Error('Provider not found')
   }
 
-  const total_price = (provider.hourly_rate || 0) * bookingData.duration_hours
+  // Price is fixed per service/experience, not per hour
+  const total_price = provider.price || 0
 
   if (provider.status !== 'approved') {
     throw new Error('Provider is not approved')

@@ -12,7 +12,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { AddressAutocomplete } from '@/components/AddressAutocomplete'
 import { createBooking } from '@/lib/actions/bookings'
 import { getProviderById } from '@/lib/actions/services'
-import { Star, MapPin, Euro } from 'lucide-react'
+import { MapPin, Euro } from 'lucide-react'
 import Link from 'next/link'
 
 export default function BookPage() {
@@ -144,7 +144,7 @@ export default function BookPage() {
   }
 
   const displayName = provider.business_name || provider.profiles?.full_name || 'Provider'
-  const price = provider.hourly_rate || 0
+  const price = provider.price || 0
   const minDate = new Date().toISOString().slice(0, 16)
 
   return (
@@ -242,7 +242,7 @@ export default function BookPage() {
                 <div className="flex items-center justify-center">
                   <div className="flex items-center gap-2">
                     <Euro className="w-5 h-5 text-muted-foreground" />
-                    <span className="text-2xl font-bold">
+                    <span className="text-2xl font-bold font-mono" style={{ fontFamily: 'var(--font-source-code-pro)' }}>
                       €{price.toFixed(2)}
                     </span>
                   </div>
@@ -252,9 +252,9 @@ export default function BookPage() {
 
             {/* Error Message */}
             {error && (
-              <Card className="shadow-none border-red-500">
+              <Card className="shadow-none border-rose-500">
                 <CardContent className="p-6">
-                  <p className="text-red-500">{error}</p>
+                  <p className="text-rose-500">{error}</p>
                 </CardContent>
               </Card>
             )}

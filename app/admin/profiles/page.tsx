@@ -262,9 +262,9 @@ export default function AdminProfilesPage() {
           </div>
 
           {error && (
-            <Card className="mb-6 shadow-none border-red-500">
+            <Card className="mb-6 shadow-none border-rose-500">
               <CardContent className="p-6">
-                <p className="text-red-500">{error}</p>
+                <p className="text-rose-500">{error}</p>
               </CardContent>
             </Card>
           )}

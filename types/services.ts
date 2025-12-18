@@ -22,11 +22,11 @@ export const SERVICE_CATEGORIES: ServiceCategory[] = [
     slug: 'coiffeur-prive',
   },
   {
-    id: 'stylist',
-    name: 'Stylist',
-    description: 'Personal styling and fashion consultation',
-    icon: 'shirt',
-    slug: 'stylist',
+    id: 'cooking-classes',
+    name: 'Cooking classes',
+    description: 'Learn to cook with professional chefs',
+    icon: 'chef-hat',
+    slug: 'cooking-classes',
   },
   {
     id: 'interior-stylist',

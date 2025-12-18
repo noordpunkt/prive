@@ -7,6 +7,12 @@ import { AuthModal } from '@/components/AuthModal'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import { LogOut } from 'lucide-react'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 
 export function UserMenu() {
   const router = useRouter()
@@ -130,22 +136,25 @@ export function UserMenu() {
     console.log('✅ UserMenu: User logged in! Displaying:', displayName)
     
     return (
-      <div className="flex items-center gap-4">
-        <span className="text-sm font-semibold" style={{ fontFamily: 'var(--font-au-bold)' }}>
-          Hi {displayName}!
-        </span>
-        <SmallButton 
-          variant="ghost" 
-          size="sm" 
-          onClick={async () => {
-            console.log('🚪 Signing out...')
-            await handleSignOut()
-          }}
-        >
-          <LogOut className="h-4 w-4 mr-2" />
-          Sign Out
-        </SmallButton>
-      </div>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <button className="text-sm hover:opacity-80 transition-opacity" style={{ fontFamily: 'var(--font-au-light)' }}>
+            {displayName}
+          </button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem
+            onClick={async () => {
+              console.log('🚪 Signing out...')
+              await handleSignOut()
+            }}
+            className="cursor-pointer"
+          >
+            <LogOut className="h-4 w-4 mr-2" />
+            Sign Out
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
     )
   }
 

@@ -133,9 +133,9 @@ export default function AdminPackagesPage() {
           </div>
 
           {error && (
-            <Card className="mb-6 shadow-none border-red-500">
+            <Card className="mb-6 shadow-none border-rose-500">
               <CardContent className="p-6">
-                <p className="text-red-500">{error}</p>
+                <p className="text-rose-500">{error}</p>
               </CardContent>
             </Card>
           )}
@@ -183,11 +183,11 @@ export default function AdminPackagesPage() {
                       <div className="space-y-2 mb-4">
                         <div className="flex items-center gap-2">
                           <Euro className="w-4 h-4 text-muted-foreground" />
-                          <span className="font-semibold" style={{ fontFamily: 'var(--font-au-bold)' }}>
+                          <span className="font-semibold font-mono" style={{ fontFamily: 'var(--font-source-code-pro)' }}>
                             €{Math.round(pkg.price_per_person || 0)} /personne
                           </span>
                         </div>
-                        <p className="text-sm text-muted-foreground" style={{ fontFamily: 'var(--font-au-light)' }}>
+                        <p className="text-sm text-muted-foreground font-mono" style={{ fontFamily: 'var(--font-source-code-pro)' }}>
                           Prix minimum: €{Math.round(pkg.minimum_price || pkg.price_per_person || 0)}
                         </p>
                       </div>

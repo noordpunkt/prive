@@ -12,13 +12,13 @@ import { Slider } from '@/components/ui/slider'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 import { Star, MapPin, Euro, Clock, X, Upload, Trash2, Image as ImageIcon, Check } from 'lucide-react'
-import { uploadProviderImage, deleteProviderImage, setCoverImage } from '@/lib/actions/providers'
+import { deleteProviderImage, setCoverImage, addProviderImageUrl } from '@/lib/actions/providers'
 
 interface Provider {
   id: string
   business_name: string | null
   bio: string | null
-  hourly_rate: number
+  price: number
   total_hours: number | null
   rating: number
   total_reviews: number
@@ -45,7 +45,7 @@ export default function AdminProvidersPage() {
   const [providers, setProviders] = useState<Provider[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [editingField, setEditingField] = useState<{ providerId: string; field: 'business_name' | 'bio' | 'service_area' | 'hourly_rate' | 'total_hours' } | null>(null)
+  const [editingField, setEditingField] = useState<{ providerId: string; field: 'business_name' | 'bio' | 'service_area' | 'price' | 'total_hours' } | null>(null)
   const [editingValue, setEditingValue] = useState<string>('')
   const [sliderValue, setSliderValue] = useState<number[]>([0])
   const [saving, setSaving] = useState(false)
@@ -53,7 +53,6 @@ export default function AdminProvidersPage() {
   const [showSuccess, setShowSuccess] = useState(false)
   const [fadeOut, setFadeOut] = useState(false)
   const [uploadingImages, setUploadingImages] = useState<{ [key: string]: boolean }>({})
-  const [managingImages, setManagingImages] = useState<string | null>(null)
   const titleInputRef = useRef<HTMLInputElement>(null)
   const fileInputRefs = useRef<{ [key: string]: HTMLInputElement | null }>({})
 
@@ -95,8 +94,8 @@ export default function AdminProvidersPage() {
       // Initialize slider values when opening panel
       const provider = providers.find(p => p.id === editingField.providerId)
       if (provider) {
-        if (editingField.field === 'hourly_rate') {
-          setSliderValue([Math.max(20, provider.hourly_rate || 100)])
+        if (editingField.field === 'price') {
+          setSliderValue([Math.max(20, provider.price || 100)])
         } else if (editingField.field === 'total_hours') {
           setSliderValue([provider.total_hours || 2])
         }
@@ -156,7 +155,7 @@ export default function AdminProvidersPage() {
     checkAdminAndLoad()
   }, [router])
 
-  const handleUpdateField = async (providerId: string, field: 'business_name' | 'bio' | 'service_area' | 'hourly_rate' | 'total_hours', value: string | number) => {
+  const handleUpdateField = async (providerId: string, field: 'business_name' | 'bio' | 'service_area' | 'price' | 'total_hours', value: string | number) => {
     setSaving(true)
     setError(null)
 
@@ -174,13 +173,13 @@ export default function AdminProvidersPage() {
           .map(loc => loc.trim())
           .filter(loc => loc.length > 0)
         updateData.service_area = locations.length > 0 ? locations : null
-      } else if (field === 'hourly_rate') {
-        // Handle hourly rate from slider (number) or string
+      } else if (field === 'price') {
+        // Handle price from slider (number) or string
         const rate = typeof value === 'number' ? value : parseFloat(value.toString().trim())
         if (isNaN(rate) || rate < 20) {
           throw new Error('Invalid price. Minimum price is €20.')
         }
-        updateData.hourly_rate = rate
+        updateData.price = rate
       } else if (field === 'total_hours') {
         // Handle total hours from slider (number) or string
         const hours = typeof value === 'number' ? value : parseFloat(value.toString().trim())
@@ -252,10 +251,61 @@ export default function AdminProvidersPage() {
     setError(null)
 
     try {
-      const imageUrl = await uploadProviderImage(providerId, file)
+      const supabase = createClient()
+      
+      // Validate file type
+      const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
+      if (!validTypes.includes(file.type)) {
+        throw new Error('Invalid file type. Please upload a JPEG, PNG, WebP, or GIF image.')
+      }
+
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        throw new Error('File size too large. Maximum size is 5MB.')
+      }
+
+      // Get current provider to check image count
+      const { data: provider } = await supabase
+        .from('service_providers')
+        .select('portfolio_images')
+        .eq('id', providerId)
+        .single()
+
+      if (!provider) {
+        throw new Error('Provider not found')
+      }
+
+      const currentImages = provider.portfolio_images || []
+      if (currentImages.length >= 6) {
+        throw new Error('Maximum 6 images allowed per provider')
+      }
+
+      // Create a unique filename
+      const fileExt = file.name.split('.').pop()
+      const fileName = `${providerId}-${Date.now()}.${fileExt}`
+      const filePath = `${providerId}/${fileName}`
+
+      // Upload directly to Supabase Storage from client
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('provider-images')
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: false
+        })
+
+      if (uploadError) {
+        throw new Error(`Failed to upload: ${uploadError.message}`)
+      }
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('provider-images')
+        .getPublicUrl(filePath)
+
+      // Add image URL to database via Server Action (small payload)
+      await addProviderImageUrl(providerId, publicUrl)
       
       // Reload providers
-      const supabase = createClient()
       const { data: updatedProviders, error: fetchError } = await supabase
         .from('service_providers')
         .select(`
@@ -430,18 +480,18 @@ export default function AdminProvidersPage() {
   return (
     <div className="min-h-screen bg-background relative flex overflow-hidden">
       {/* Main Content - 1/3 width when panel is open, full width otherwise */}
-      <div className={`flex flex-col transition-all duration-300 flex-shrink-0 ${modalOpen ? 'w-1/3' : 'w-full'}`}>
+      <div className={`flex flex-col transition-all duration-300 flex-shrink-0 ${modalOpen ? 'w-full md:w-1/3' : 'w-full'}`}>
         <Header />
         
         <main className="pt-24 flex-1 overflow-y-auto">
-          <div className="container mx-auto px-4 py-16">
+          <div className="container mx-auto px-4 sm:px-6 py-8 sm:py-12 md:py-16">
           <div className={`mb-8 flex ${modalOpen ? 'flex-col' : 'flex-col md:flex-row'} ${modalOpen ? '' : 'md:items-center md:justify-between'} gap-4`}>
             <div>
               <h1
                 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-4"
                 style={{ fontFamily: 'var(--font-au-bold)' }}
               >
-                Manage Providers
+                Providers
               </h1>
               <p className="text-lg md:text-xl text-muted-foreground" style={{ fontFamily: 'var(--font-au-light)' }}>
                 View and manage all service providers
@@ -453,9 +503,9 @@ export default function AdminProvidersPage() {
           </div>
 
           {error && (
-            <Card className="mb-6 shadow-none border-red-500">
+            <Card className="mb-6 shadow-none border-rose-500">
               <CardContent className="p-6">
-                <p className="text-red-500">{error}</p>
+                <p className="text-rose-500">{error}</p>
               </CardContent>
             </Card>
           )}
@@ -492,10 +542,10 @@ export default function AdminProvidersPage() {
                 
                 return (
                   <Card key={provider.id} className="shadow-none">
-                    <CardContent className="p-6">
-                      <div className={`flex items-start gap-6 ${modalOpen ? 'flex-col' : ''}`}>
+                    <CardContent className="p-4 sm:p-6">
+                      <div className={`flex items-start gap-4 sm:gap-6 ${modalOpen ? 'flex-col' : 'flex-col sm:flex-row'}`}>
                         {/* Avatar */}
-                        <div className="flex-shrink-0">
+                        <div className="flex-shrink-0 mx-auto sm:mx-0">
                           {avatarUrl ? (
                             <img
                               src={avatarUrl}
@@ -525,28 +575,28 @@ export default function AdminProvidersPage() {
                                   : 'border-black/10 dark:border-white/10'
                               }`}
                             >
-                              <h3 className="text-xl font-bold text-left">
+                              <h3 className="text-lg sm:text-xl font-bold text-left">
                                 {displayName}
                               </h3>
                             </div>
                             
                             {/* Status and Available - Left aligned text below title */}
                             <div className="flex flex-col gap-1 mb-3 pb-3 border-b border-black/10 dark:border-white/10">
-                              <div className="flex items-center justify-between">
+                              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
                                 <div className="flex items-center gap-2">
                                   {provider.status === 'approved' ? (
                                     <Check className="w-4 h-4 text-green-500" />
                                   ) : provider.status === 'pending_approval' ? (
                                     <Clock className="w-4 h-4 text-orange-500" />
                                   ) : (
-                                    <X className="w-4 h-4 text-red-500" />
+                                    <X className="w-4 h-4 text-rose-500" />
                                   )}
                                   <span className={`text-sm ${
                                     provider.status === 'approved'
                                       ? 'text-green-500'
                                       : provider.status === 'pending_approval'
                                       ? 'text-orange-500'
-                                      : 'text-red-500'
+                                      : 'text-rose-500'
                                   }`}>
                                     {provider.status === 'approved' 
                                       ? 'Approved' 
@@ -563,38 +613,45 @@ export default function AdminProvidersPage() {
                                   <button
                                     onClick={() => handleApproveProvider(provider.id)}
                                     disabled={saving}
-                                    className="h-7 px-3 text-xs bg-black text-white hover:bg-black/80 dark:bg-white dark:text-black dark:hover:bg-white/80 font-sans border border-black/10 dark:border-white/10 rounded-none disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                    className="h-7 px-3 text-xs bg-black text-white hover:bg-black/80 dark:bg-white dark:text-black dark:hover:bg-white/80 font-sans border border-black/10 dark:border-white/10 rounded-none disabled:opacity-50 disabled:cursor-not-allowed transition-colors w-full sm:w-auto"
                                     style={{ fontFamily: 'inherit' }}
                                   >
                                     Approve
                                   </button>
                                 )}
                               </div>
-                              <span className={`text-sm ${
-                                provider.available 
-                                  ? 'text-black dark:text-white' 
-                                  : 'text-muted-foreground'
-                              }`}>
-                                {provider.available ? 'Available' : 'Unavailable'}
-                              </span>
+                              <div className="flex items-center gap-2">
+                                <div className="w-4 h-4 flex items-center justify-center">
+                                  <div className={`w-2 h-2 rounded-full animate-pulse-slow ${
+                                    provider.available ? 'bg-green-500' : 'bg-rose-500'
+                                  }`}></div>
+                                </div>
+                                <span className={`text-sm ${
+                                  provider.available 
+                                    ? 'text-black dark:text-white' 
+                                    : 'text-muted-foreground'
+                                }`}>
+                                  {provider.available ? 'Available' : 'Unavailable'}
+                                </span>
+                              </div>
                             </div>
                           </div>
                           
                           {/* Price Row - Clickable like title */}
                           <div 
                             onClick={() => {
-                              setEditingField({ providerId: provider.id, field: 'hourly_rate' })
-                              setEditingValue(provider.hourly_rate?.toString() || '')
+                              setEditingField({ providerId: provider.id, field: 'price' })
+                              setEditingValue(provider.price?.toString() || '')
                               setModalOpen(true)
                             }}
                             className={`py-3 pb-3 border-b cursor-pointer hover:bg-neutral-50 dark:hover:bg-neutral-900 transition-colors ${
-                              modalOpen && editingField?.providerId === provider.id && editingField?.field === 'hourly_rate'
+                              modalOpen && editingField?.providerId === provider.id && editingField?.field === 'price'
                                 ? 'border-black dark:border-white'
                                 : 'border-black/10 dark:border-white/10'
                             }`}
                           >
-                            <span className="text-xl font-bold text-left" style={{ fontFamily: 'var(--font-au-bold)' }}>
-                              €{provider.hourly_rate?.toFixed(2) || '0.00'}
+                            <span className="text-lg sm:text-xl font-bold text-left font-mono" style={{ fontFamily: 'var(--font-source-code-pro)' }}>
+                              €{provider.price?.toFixed(2) || '0.00'}
                             </span>
                           </div>
 
@@ -634,12 +691,9 @@ export default function AdminProvidersPage() {
                                 : 'border-black/10 dark:border-white/10'
                             }`}
                           >
-                            <div className="flex items-center gap-1">
-                              <Clock className="w-4 h-4 text-muted-foreground" />
-                              <span className="text-sm text-left" style={{ fontFamily: 'var(--font-au-regular)' }}>
-                                {provider.total_hours ? `${provider.total_hours}h` : '2h'}
-                              </span>
-                            </div>
+                            <span className="text-sm text-left font-mono" style={{ fontFamily: 'var(--font-source-code-pro)' }}>
+                              {provider.total_hours ? `${provider.total_hours}h` : '2h'}
+                            </span>
                           </div>
 
                           {/* Description - Clickable like title and price */}
@@ -666,46 +720,38 @@ export default function AdminProvidersPage() {
 
                           {/* Image Management Section */}
                           <div className="mt-4 pt-4 border-t border-black/10 dark:border-white/10">
-                            <div className="flex items-center justify-between mb-3">
+                            <div className="mb-3">
                               <h4 className="text-sm font-semibold flex items-center gap-2">
                                 <ImageIcon className="w-4 h-4" />
                                 Portfolio Images ({provider.portfolio_images?.length || 0}/6)
                               </h4>
-                              {managingImages === provider.id ? (
-                                <Button
-                                  size="sm"
-                                  variant="ghost"
-                                  onClick={() => setManagingImages(null)}
-                                  className="h-6 px-2 text-xs"
-                                >
-                                  Done
-                                </Button>
-                              ) : (
-                                <Button
-                                  size="sm"
-                                  variant="ghost"
-                                  onClick={() => setManagingImages(provider.id)}
-                                  className="h-6 px-2 text-xs"
-                                >
-                                  Manage Images
-                                </Button>
-                              )}
                             </div>
 
-                            {managingImages === provider.id && (
-                              <div className="space-y-3">
-                                {/* Existing Images Grid */}
-                                {provider.portfolio_images && provider.portfolio_images.length > 0 && (
-                                  <div className="grid grid-cols-3 gap-2">
-                                    {provider.portfolio_images.map((imageUrl, index) => {
-                                      const isCover = provider.cover_image_index === index || 
-                                                      (provider.cover_image_index === null && index === 0)
-                                      return (
-                                        <div key={index} className="relative group">
+                            <div className="space-y-3">
+                              {/* 6 Image Holders Grid */}
+                              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2">
+                                {Array.from({ length: 6 }).map((_, index) => {
+                                  const imageUrl = provider.portfolio_images?.[index]
+                                  const isCover = provider.cover_image_index === index || 
+                                                  (provider.cover_image_index === null && index === 0 && imageUrl)
+                                  const isEmpty = !imageUrl
+                                  const canUpload = !provider.portfolio_images || provider.portfolio_images.length < 6
+                                  
+                                  return (
+                                    <div 
+                                      key={index} 
+                                      className={`relative group aspect-video ${
+                                        isEmpty 
+                                          ? 'border-2 border-dashed border-neutral-300 dark:border-neutral-700' 
+                                          : ''
+                                      }`}
+                                    >
+                                      {imageUrl ? (
+                                        <>
                                           <img
                                             src={imageUrl}
                                             alt={`Portfolio ${index + 1}`}
-                                            className={`w-full h-24 object-cover border-2 ${
+                                            className={`w-full h-full object-cover border-2 ${
                                               isCover 
                                                 ? 'border-green-500' 
                                                 : 'border-transparent'
@@ -716,104 +762,74 @@ export default function AdminProvidersPage() {
                                               Cover
                                             </div>
                                           )}
-                                          <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                                            {!isCover && (
-                                              <Button
-                                                size="sm"
-                                                variant="secondary"
-                                                onClick={() => handleSetCoverImage(provider.id, index)}
-                                                className="h-7 px-2 text-xs"
-                                              >
-                                                Set Cover
-                                              </Button>
-                                            )}
-                                            <Button
-                                              size="sm"
-                                              variant="destructive"
-                                              onClick={() => handleImageDelete(provider.id, imageUrl)}
-                                              className="h-7 px-2 text-xs"
+                                          {!isCover && (
+                                            <button
+                                              onClick={() => handleSetCoverImage(provider.id, index)}
+                                              className="absolute top-3 left-3 text-white text-sm font-bold hover:opacity-80 transition-opacity z-10"
+                                              style={{ fontFamily: 'var(--font-au-bold)' }}
                                             >
-                                              <Trash2 className="w-3 h-3" />
-                                            </Button>
+                                              Set Cover
+                                            </button>
+                                          )}
+                                          <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center p-2">
+                                            <button
+                                              onClick={() => handleImageDelete(provider.id, imageUrl)}
+                                              className="flex items-center justify-center p-2 hover:opacity-80 transition-opacity"
+                                              aria-label="Delete image"
+                                            >
+                                              <Trash2 className="w-6 h-6 text-white" />
+                                            </button>
                                           </div>
-                                        </div>
-                                      )
-                                    })}
-                                  </div>
-                                )}
-
-                                {/* Upload Button */}
-                                {(!provider.portfolio_images || provider.portfolio_images.length < 6) && (
-                                  <div>
-                                    <input
-                                      ref={(el) => {
-                                        fileInputRefs.current[provider.id] = el
-                                      }}
-                                      type="file"
-                                      accept="image/jpeg,image/png,image/webp,image/gif"
-                                      className="hidden"
-                                      onChange={(e) => {
-                                        const file = e.target.files?.[0]
-                                        if (file) {
-                                          handleImageUpload(provider.id, file)
-                                          e.target.value = '' // Reset input
-                                        }
-                                      }}
-                                      disabled={uploadingImages[provider.id]}
-                                    />
-                                    <Button
-                                      size="sm"
-                                      variant="outline"
-                                      onClick={() => fileInputRefs.current[provider.id]?.click()}
-                                      disabled={uploadingImages[provider.id]}
-                                      className="w-full"
-                                    >
-                                      <Upload className="w-4 h-4 mr-2" />
-                                      {uploadingImages[provider.id] ? 'Uploading...' : 'Upload Image'}
-                                    </Button>
-                                  </div>
-                                )}
-
-                                {provider.portfolio_images && provider.portfolio_images.length === 0 && (
-                                  <p className="text-xs text-muted-foreground text-center py-4">
-                                    No images uploaded yet. Upload up to 6 images.
-                                  </p>
-                                )}
-                              </div>
-                            )}
-
-                            {/* Preview when not managing */}
-                            {managingImages !== provider.id && provider.portfolio_images && provider.portfolio_images.length > 0 && (
-                              <div className="flex gap-2 overflow-x-auto pb-2">
-                                {provider.portfolio_images.slice(0, 3).map((imageUrl, index) => {
-                                  const isCover = provider.cover_image_index === index || 
-                                                  (provider.cover_image_index === null && index === 0)
-                                  return (
-                                    <div key={index} className="relative flex-shrink-0">
-                                      <img
-                                        src={imageUrl}
-                                        alt={`Portfolio ${index + 1}`}
-                                        className={`w-16 h-16 object-cover border ${
-                                          isCover 
-                                            ? 'border-green-500' 
-                                            : 'border-black/10 dark:border-white/10'
-                                        }`}
-                                      />
-                                      {isCover && (
-                                        <div className="absolute top-0 right-0 bg-green-500 text-white text-[10px] px-1">
-                                          Cover
+                                        </>
+                                      ) : (
+                                        <div 
+                                          className={`w-full h-full flex items-center justify-center ${
+                                            index === (provider.portfolio_images?.length || 0) && canUpload
+                                              ? 'cursor-pointer hover:bg-neutral-50 dark:hover:bg-neutral-900 transition-colors'
+                                              : ''
+                                          }`}
+                                          onClick={() => {
+                                            if (index === (provider.portfolio_images?.length || 0) && canUpload && !uploadingImages[provider.id]) {
+                                              fileInputRefs.current[provider.id]?.click()
+                                            }
+                                          }}
+                                        >
+                                          {index === (provider.portfolio_images?.length || 0) && canUpload && !uploadingImages[provider.id] && (
+                                            <div className="text-xs text-muted-foreground hover:text-foreground transition-colors text-center">
+                                              <Upload className="w-5 h-5 mx-auto mb-1" />
+                                              <span>Upload</span>
+                                            </div>
+                                          )}
+                                          {index === (provider.portfolio_images?.length || 0) && uploadingImages[provider.id] && (
+                                            <div className="text-xs text-muted-foreground text-center">
+                                              Uploading...
+                                            </div>
+                                          )}
                                         </div>
                                       )}
                                     </div>
                                   )
                                 })}
-                                {provider.portfolio_images.length > 3 && (
-                                  <div className="w-16 h-16 flex items-center justify-center bg-muted text-muted-foreground text-xs">
-                                    +{provider.portfolio_images.length - 3}
-                                  </div>
-                                )}
                               </div>
-                            )}
+
+                              {/* Hidden File Input */}
+                              <input
+                                ref={(el) => {
+                                  fileInputRefs.current[provider.id] = el
+                                }}
+                                type="file"
+                                accept="image/jpeg,image/png,image/webp,image/gif"
+                                className="hidden"
+                                onChange={(e) => {
+                                  const file = e.target.files?.[0]
+                                  if (file) {
+                                    handleImageUpload(provider.id, file)
+                                    e.target.value = '' // Reset input
+                                  }
+                                }}
+                                disabled={uploadingImages[provider.id] || (provider.portfolio_images?.length || 0) >= 6}
+                              />
+                            </div>
                           </div>
                         </div>
 
@@ -833,8 +849,8 @@ export default function AdminProvidersPage() {
       {/* Edit Side Panel - Slides from Right */}
       {modalOpen && (
         <>
-          {/* Side Panel - 2/3 width, slides from right */}
-          <div className="fixed top-0 right-0 h-full w-2/3 bg-background z-50 shadow-xl flex flex-col slide-in-from-right overflow-y-auto">
+          {/* Side Panel - Full width on mobile, 2/3 width on desktop, slides from right */}
+          <div className="fixed top-0 right-0 h-full w-full md:w-2/3 bg-background z-50 shadow-xl flex flex-col slide-in-from-right overflow-y-auto">
             {/* Close Button */}
             <button
               onClick={() => {
@@ -852,7 +868,7 @@ export default function AdminProvidersPage() {
             {editingField && (
               <>
                 {/* Main Content Area */}
-                <div className="flex-1 flex items-center justify-center p-12 overflow-y-auto">
+                <div className="flex-1 flex items-center justify-center p-4 sm:p-8 md:p-12 overflow-y-auto">
                 {editingField.field === 'business_name' && (
                   <div className="w-full text-center">
                     <Input
@@ -869,7 +885,7 @@ export default function AdminProvidersPage() {
                         e.target.setSelectionRange(e.target.value.length, e.target.value.length)
                       }}
                       placeholder="Atelier raviolis maison & dîner gourmet à Nice"
-                      className="w-full text-2xl md:text-3xl font-bold text-center mb-4"
+                      className="w-full text-xl sm:text-2xl md:text-3xl font-bold text-center mb-4"
                       disabled={saving}
                       maxLength={30}
                       style={{ fontFamily: 'var(--font-au-bold)' }}
@@ -880,10 +896,10 @@ export default function AdminProvidersPage() {
                   </div>
                 )}
 
-                {editingField.field === 'hourly_rate' && (
+                {editingField.field === 'price' && (
                   <div className="w-full max-w-2xl mx-auto">
                     <div className="flex items-center justify-center gap-2 mb-6">
-                      <span className="text-4xl font-bold" style={{ fontFamily: 'var(--font-au-bold)' }}>
+                      <span className="text-3xl sm:text-4xl font-bold font-mono" style={{ fontFamily: 'var(--font-source-code-pro)' }}>
                         €{sliderValue[0].toFixed(0)}
                       </span>
                     </div>
@@ -909,9 +925,14 @@ export default function AdminProvidersPage() {
                       value={editingValue}
                       onChange={(e) => setEditingValue(e.target.value)}
                       placeholder="Les voyageurs cuisineront avec un chef italo-méditerranéen et apprendront à façonner la pasta fresca transmise dans sa famille..."
-                      className="min-h-[400px] w-full text-base resize-none"
+                      className="min-h-[300px] sm:min-h-[400px] w-full text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold resize-none"
                       disabled={saving}
+                      maxLength={200}
+                      style={{ fontFamily: 'var(--font-au-bold)' }}
                     />
+                    <p className="text-sm text-muted-foreground mt-4" style={{ fontFamily: 'var(--font-au-light)' }}>
+                      Characters remaining: {Math.max(0, 200 - editingValue.length)}/200
+                    </p>
                   </div>
                 )}
 
@@ -920,8 +941,8 @@ export default function AdminProvidersPage() {
                     <Input
                       value={editingValue}
                       onChange={(e) => setEditingValue(e.target.value)}
-                      placeholder="Nice, Cannes"
-                      className="w-full text-2xl md:text-3xl font-semibold text-center mb-4"
+                      placeholder="Monaco, Montecarlo"
+                      className="w-full text-xl sm:text-2xl md:text-3xl font-semibold text-center mb-4"
                       disabled={saving}
                     />
                   </div>
@@ -930,8 +951,7 @@ export default function AdminProvidersPage() {
                 {editingField.field === 'total_hours' && (
                   <div className="w-full max-w-2xl mx-auto">
                     <div className="flex items-center justify-center gap-2 mb-6">
-                      <Clock className="w-6 h-6 text-muted-foreground" />
-                      <span className="text-4xl font-bold" style={{ fontFamily: 'var(--font-au-bold)' }}>
+                      <span className="text-3xl sm:text-4xl font-bold font-mono" style={{ fontFamily: 'var(--font-source-code-pro)' }}>
                         {sliderValue[0]}h
                       </span>
                     </div>
@@ -953,10 +973,10 @@ export default function AdminProvidersPage() {
               </div>
 
               {/* Save Button at Bottom */}
-              <div className="border-t border-black/10 dark:border-white/10 p-6 flex justify-center">
+              <div className="border-t border-black/10 dark:border-white/10 p-4 sm:p-6 flex justify-center">
                 <Button
                   onClick={() => {
-                    if (editingField.field === 'hourly_rate' || editingField.field === 'total_hours') {
+                    if (editingField.field === 'price' || editingField.field === 'total_hours') {
                       handleUpdateField(editingField.providerId, editingField.field, sliderValue[0])
                     } else {
                       handleUpdateField(editingField.providerId, editingField.field, editingValue)
@@ -965,10 +985,10 @@ export default function AdminProvidersPage() {
                   disabled={
                     saving || 
                     (editingField.field === 'business_name' && editingValue.length === 0) ||
-                    (editingField.field === 'hourly_rate' && sliderValue[0] < 20) ||
+                    (editingField.field === 'price' && sliderValue[0] < 20) ||
                     (editingField.field === 'total_hours' && sliderValue[0] <= 0)
                   }
-                  className="w-1/3"
+                  className="w-full sm:w-1/2 md:w-1/3"
                   size="lg"
                 >
                   {saving ? 'Saving...' : 'Save'}

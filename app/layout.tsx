@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
+import { Source_Code_Pro } from "next/font/google";
 import "./globals.css";
 
 // AB-Prive font for buttons (uppercase)
@@ -61,8 +62,16 @@ const auBoldFont = localFont({
   display: "swap",
 });
 
+// Source Code Pro for monospace (prices) - Light weight
+const sourceCodePro = Source_Code_Pro({
+  subsets: ["latin"],
+  weight: "300",
+  variable: "--font-source-code-pro",
+  display: "swap",
+});
+
 export const metadata: Metadata = {
-  title: "Privé à la Carte - Services Platform",
+  title: "Les Collectionneurs. - Services Platform",
   description: "Discover premium private services à la carte: private chefs, hairdressers, gardening, styling, and interior design.",
 };
 
@@ -74,7 +83,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${customFont.variable} ${auLightFont.variable} ${auRegularFont.variable} ${auBoldFont.variable} antialiased`}
+        className={`${customFont.variable} ${auLightFont.variable} ${auRegularFont.variable} ${auBoldFont.variable} ${sourceCodePro.variable} antialiased`}
       >
         {children}
       </body>

@@ -18,7 +18,7 @@ export default function Home() {
               className="text-5xl md:text-7xl lg:text-8xl mb-6"
               style={{ fontFamily: 'var(--font-au-regular)' }}
             >
-              Professionnels privés à la carte
+              French riviera à la carte
             </h2>
             <p className="text-xl md:text-2xl text-muted-foreground mb-12 max-w-2xl mx-auto" style={{ fontFamily: 'var(--font-au-light)' }}>
               Discover exceptional private services tailored to your lifestyle.
@@ -70,12 +70,12 @@ export default function Home() {
                   </div>
                 )}
                 
-                {/* Icon for Stylist - top right */}
+                {/* Icon for Cooking classes - top right */}
                 {index === 2 && (
                   <div className="absolute top-8 right-8 z-10">
                     <img 
                       src="/images/Icon03.svg" 
-                      alt="Stylist Icon" 
+                      alt="Cooking classes Icon" 
                       className="w-10 h-10 md:w-12 md:h-12 invert dark:invert-0"
                     />
                   </div>

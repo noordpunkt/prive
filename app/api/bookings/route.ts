@@ -24,7 +24,7 @@ export async function GET() {
         provider:service_providers (
           id,
           business_name,
-          hourly_rate,
+          price,
           profiles:profile_id (
             id,
             full_name,
@@ -93,7 +93,7 @@ export async function POST(request: Request) {
     // Get provider to calculate price
     const { data: provider, error: providerError } = await supabase
       .from('service_providers')
-      .select('hourly_rate')
+      .select('price')
       .eq('id', provider_id)
       .single()
 
@@ -104,7 +104,8 @@ export async function POST(request: Request) {
       )
     }
 
-    const total_price = (provider.hourly_rate || 0) * duration_hours
+    // Price is fixed per service/experience, not per hour
+    const total_price = provider.price || 0
 
     // Create booking
     const { data: booking, error: bookingError } = await supabase
