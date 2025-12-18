@@ -1,9 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  serverActions: {
-    bodySizeLimit: '10mb',
-  },
+  // Image uploads are now handled client-side directly to Supabase Storage
+  // No need for serverActions bodySizeLimit
 };
 
 export default nextConfig;
