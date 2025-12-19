@@ -6,7 +6,9 @@ import { Card, CardContent } from '@/components/ui/card'
 import { MapPin } from 'lucide-react'
 import { getProviderById, getServicePackagesByProvider } from '@/lib/actions/services'
 import { getReviewsByProvider } from '@/lib/actions/reviews'
-import Link from 'next/link'
+import { ImageSlider } from '@/components/ImageSlider'
+import { BookingForm } from '@/components/BookingForm'
+import { BookNowButton } from '@/components/BookNowButton'
 
 interface ProviderPageProps {
   params: Promise<{
@@ -44,11 +46,11 @@ export default async function ProviderPage({ params }: ProviderPageProps) {
   const totalReviews = provider.total_reviews || 0
   const serviceCategory = provider.service_category
   
-  // Get hero image from portfolio_images using cover_image_index, or use first image, or default
+  // Get portfolio images for slider
   const coverIndex = provider.cover_image_index ?? 0
-  const heroImage = provider.portfolio_images && provider.portfolio_images.length > 0
-    ? provider.portfolio_images[coverIndex] || provider.portfolio_images[0]
-    : '/images/chef01.jpg'
+  const portfolioImages = provider.portfolio_images && provider.portfolio_images.length > 0
+    ? provider.portfolio_images
+    : ['/images/chef01.jpg']
   
   // Get price from packages or use fixed service price
   const minPrice = servicePackages.length > 0
@@ -63,15 +65,13 @@ export default async function ProviderPage({ params }: ProviderPageProps) {
         <div className="container mx-auto px-4 py-8 max-w-4xl">
           {/* Provider Profile */}
           <div className="space-y-6">
-              {/* Hero Image with Overlapping Avatar */}
-              <div className="relative w-full aspect-[4/3] bg-black">
-                <div className="absolute inset-0 overflow-hidden">
-                  <img
-                    src={heroImage}
-                    alt={displayName}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
+              {/* Image Slider with Overlapping Avatar */}
+              <div className="relative">
+                <ImageSlider
+                  images={portfolioImages}
+                  coverIndex={coverIndex}
+                  alt={displayName}
+                />
                 {/* Circular Avatar Overlapping Bottom Center */}
                 <div className="absolute -bottom-12 left-1/2 -translate-x-1/2 z-20">
                   {avatarUrl ? (
@@ -136,6 +136,9 @@ export default async function ProviderPage({ params }: ProviderPageProps) {
 
               </div>
           </div>
+
+          {/* Booking Form */}
+          <BookingForm providerId={id} provider={provider} />
 
           {/* Reviews Section */}
           {reviews.length > 0 && (
@@ -208,16 +211,7 @@ export default async function ProviderPage({ params }: ProviderPageProps) {
             <p className="text-2xl font-bold font-mono" style={{ fontFamily: 'var(--font-source-code-pro)' }}>
               €{Math.round(minPrice)}
             </p>
-            <Button 
-              size="lg" 
-              asChild 
-              disabled={!provider.available}
-              className="w-full sm:w-auto min-w-[200px]"
-            >
-              <Link href={`/book/${id}`}>
-                Book now
-              </Link>
-            </Button>
+            <BookNowButton disabled={!provider.available} />
           </div>
         </div>
       </div>

@@ -2,7 +2,6 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { Input } from '@/components/ui/input'
-import { MapPin } from 'lucide-react'
 
 interface AddressAutocompleteProps {
   value: string
@@ -75,7 +74,6 @@ export function AddressAutocomplete({
   return (
     <div ref={containerRef} className="relative">
       <div className="relative">
-        <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
         <Input
           ref={inputRef}
           id={id}
@@ -90,7 +88,7 @@ export function AddressAutocomplete({
           placeholder={placeholder}
           required={required}
           disabled={disabled}
-          className="pl-10"
+          className="pb-2"
         />
       </div>
       
@@ -103,10 +101,7 @@ export function AddressAutocomplete({
               onClick={() => handleSelectSuggestion(suggestion)}
               className="w-full text-left px-4 py-2 hover:bg-neutral-100 dark:hover:bg-neutral-900 transition-colors border-b border-black/10 dark:border-white/10 last:border-b-0"
             >
-              <div className="flex items-center gap-2">
-                <MapPin className="w-4 h-4 text-muted-foreground" />
-                <span className="text-sm">{suggestion}</span>
-              </div>
+              <span className="text-sm">{suggestion}</span>
             </button>
           ))}
         </div>

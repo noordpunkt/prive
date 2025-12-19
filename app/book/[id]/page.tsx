@@ -8,103 +8,61 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
-import { AddressAutocomplete } from '@/components/AddressAutocomplete'
-import { createBooking } from '@/lib/actions/bookings'
-import { getProviderById } from '@/lib/actions/services'
-import { MapPin, Euro } from 'lucide-react'
+import { getBookingById } from '@/lib/actions/bookings'
+import { Euro } from 'lucide-react'
 import Link from 'next/link'
 
 export default function BookPage() {
   const router = useRouter()
   const params = useParams()
-  const providerId = params.id as string
+  const bookingId = params.id as string
   
-  const [provider, setProvider] = useState<any>(null)
+  const [booking, setBooking] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   
-  const [formData, setFormData] = useState({
-    scheduled_at: '',
-    duration_hours: 1,
-    address: '',
-    address_details: '',
-    notes: '',
+  const [cardData, setCardData] = useState({
+    cardNumber: '',
+    expiryDate: '',
+    cvv: '',
+    cardholderName: '',
   })
 
   useEffect(() => {
-    async function loadProvider() {
-      if (!providerId) return
+    async function loadBooking() {
+      if (!bookingId) return
       
       try {
-        const providerData = await getProviderById(providerId)
-        setProvider(providerData)
-        // Set default duration to provider's total_hours or 2 hours
-        setFormData(prev => ({
-          ...prev,
-          duration_hours: providerData?.total_hours || 2
-        }))
+        const bookingData = await getBookingById(bookingId)
+        setBooking(bookingData)
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load provider')
+        setError(err instanceof Error ? err.message : 'Failed to load booking')
       } finally {
         setLoading(false)
       }
     }
-    loadProvider()
-  }, [providerId])
-
-  const validateForm = (): string | null => {
-    if (!formData.scheduled_at) {
-      return 'Please select a date and time'
-    }
-
-    const selectedDate = new Date(formData.scheduled_at)
-    const now = new Date()
-    if (selectedDate <= now) {
-      return 'Please select a future date and time'
-    }
-
-    if (!formData.address.trim()) {
-      return 'Please enter an address'
-    }
-
-    return null
-  }
+    loadBooking()
+  }, [bookingId])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!provider || !providerId) return
-
-    // Validate form
-    const validationError = validateForm()
-    if (validationError) {
-      setError(validationError)
-      return
-    }
+    if (!booking) return
 
     setSubmitting(true)
     setError(null)
 
     try {
-      if (!providerId) {
-        setError('Provider ID is missing')
-        return
-      }
+      // TODO: Integrate with payment processor (Stripe, etc.)
+      // For now, just simulate payment success
+      await new Promise(resolve => setTimeout(resolve, 1000))
       
-      await createBooking({
-        provider_id: providerId,
-        service_category_id: provider.service_category_id,
-        scheduled_at: formData.scheduled_at,
-        duration_hours: formData.duration_hours,
-        address: formData.address,
-        address_details: formData.address_details || undefined,
-        notes: formData.notes || undefined,
-      })
-      
-      router.push('/bookings?success=true')
+      // Update booking payment status
+      // This would typically be done via a payment webhook
+      // For now, redirect to success page
+      router.push(`/bookings?success=true&booking=${bookingId}`)
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to create booking')
+      setError(err instanceof Error ? err.message : 'Failed to process payment')
     } finally {
       setSubmitting(false)
     }
@@ -124,14 +82,14 @@ export default function BookPage() {
     )
   }
 
-  if (!provider || error) {
+  if (!booking || error) {
     return (
       <div className="min-h-screen bg-background">
         <Header />
         <main className="pt-24">
           <div className="container mx-auto px-4 py-16 text-center">
             <p className="text-muted-foreground mb-4">
-              {error || 'Provider not found'}
+              {error || 'Booking not found'}
             </p>
             <Button asChild>
               <Link href="/">Go Home</Link>
@@ -143,132 +101,185 @@ export default function BookPage() {
     )
   }
 
-  const displayName = provider.business_name || provider.profiles?.full_name || 'Provider'
-  const price = provider.price || 0
-  const minDate = new Date().toISOString().slice(0, 16)
+  const provider = booking.provider
+  const displayName = provider?.business_name || provider?.profiles?.full_name || 'Provider'
+  const scheduledDate = new Date(booking.scheduled_at)
+  const formattedDate = scheduledDate.toLocaleDateString('fr-FR', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  })
 
   return (
     <div className="min-h-screen bg-background">
       <Header />
       
-      <main className="pt-24">
+      <main className="pt-24 pb-32">
         <div className="container mx-auto px-4 py-16 max-w-3xl">
-          <div className="mb-8">
+          <div className="mb-8 text-center">
             <h1
               className="text-4xl md:text-5xl font-bold mb-4"
               style={{ fontFamily: 'var(--font-au-bold)' }}
             >
-              Book {displayName}
+              Complete Your Booking
             </h1>
-            {provider.service_category && (
-              <p className="text-xl text-muted-foreground mb-6" style={{ fontFamily: 'var(--font-au-light)' }}>
-                {provider.service_category.name}
-              </p>
-            )}
           </div>
 
-          {!provider.available && (
-            <Card className="mb-6 shadow-none">
-              <CardContent className="p-6">
-                <p className="text-muted-foreground">
-                  This provider is currently unavailable for bookings.
-                </p>
-              </CardContent>
-            </Card>
-          )}
-
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Date and Time */}
-            <div>
-              <Label htmlFor="scheduled_at">Date & Time *</Label>
-              <Input
-                id="scheduled_at"
-                type="datetime-local"
-                value={formData.scheduled_at}
-                onChange={(e) => setFormData({ ...formData, scheduled_at: e.target.value })}
-                min={minDate}
-                required
-                disabled={!provider.available}
-                className="mt-2"
-              />
-            </div>
-
-            {/* Address */}
-            <div>
-              <Label htmlFor="address">Address *</Label>
-              <div className="mt-2">
-                <AddressAutocomplete
-                  id="address"
-                  value={formData.address}
-                  onChange={(value) => setFormData({ ...formData, address: value })}
-                  placeholder="Street address, city, postal code"
-                  required
-                  disabled={!provider.available}
-                />
+          {/* Booking Summary */}
+          <Card className="mb-6 shadow-none">
+            <CardContent className="p-6 space-y-4">
+              <h2
+                className="text-2xl font-bold mb-4"
+                style={{ fontFamily: 'var(--font-au-bold)' }}
+              >
+                Booking Details
+              </h2>
+              
+              <div className="space-y-2">
+                <div>
+                  <span className="text-muted-foreground" style={{ fontFamily: 'var(--font-au-light)' }}>Provider: </span>
+                  <span style={{ fontFamily: 'var(--font-au-regular)' }}>{displayName}</span>
+                </div>
+                
+                <div>
+                  <span className="text-muted-foreground" style={{ fontFamily: 'var(--font-au-light)' }}>Date & Time: </span>
+                  <span style={{ fontFamily: 'var(--font-au-regular)' }}>{formattedDate}</span>
+                </div>
+                
+                <div>
+                  <span className="text-muted-foreground" style={{ fontFamily: 'var(--font-au-light)' }}>Duration: </span>
+                  <span style={{ fontFamily: 'var(--font-au-regular)' }}>{booking.duration_hours} {booking.duration_hours === 1 ? 'hour' : 'hours'}</span>
+                </div>
+                
+                <div>
+                  <span className="text-muted-foreground" style={{ fontFamily: 'var(--font-au-light)' }}>Address: </span>
+                  <span style={{ fontFamily: 'var(--font-au-regular)' }}>{booking.address}</span>
+                </div>
+                
+                {booking.notes && (
+                  <div>
+                    <span className="text-muted-foreground" style={{ fontFamily: 'var(--font-au-light)' }}>Special Requests: </span>
+                    <span style={{ fontFamily: 'var(--font-au-regular)' }}>{booking.notes}</span>
+                  </div>
+                )}
               </div>
-            </div>
+            </CardContent>
+          </Card>
 
-            {/* Address Details */}
-            <div>
-              <Label htmlFor="address_details">Address Details (Optional)</Label>
-              <Textarea
-                id="address_details"
-                value={formData.address_details}
-                onChange={(e) => setFormData({ ...formData, address_details: e.target.value })}
-                placeholder="Apartment number, floor, access code, etc."
-                disabled={!provider.available}
-                className="mt-2"
-                rows={3}
-              />
-            </div>
+          {/* Payment Form */}
+          <Card className="mb-6 shadow-none">
+            <CardContent className="p-6">
+              <h2
+                className="text-2xl font-bold mb-6"
+                style={{ fontFamily: 'var(--font-au-bold)' }}
+              >
+                Payment Information
+              </h2>
 
-            {/* Notes */}
-            <div>
-              <Label htmlFor="notes">Special Requests (Optional)</Label>
-              <Textarea
-                id="notes"
-                value={formData.notes}
-                onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                placeholder="Any special requests or notes for the provider"
-                disabled={!provider.available}
-                className="mt-2"
-                rows={4}
-              />
-            </div>
+              <form onSubmit={handleSubmit} className="space-y-6">
+                {/* Card Number */}
+                <div>
+                  <Label htmlFor="cardNumber">Card Number *</Label>
+                  <Input
+                    id="cardNumber"
+                    type="text"
+                    value={cardData.cardNumber}
+                    onChange={(e) => setCardData({ ...cardData, cardNumber: e.target.value.replace(/\s/g, '').replace(/(.{4})/g, '$1 ').trim() })}
+                    placeholder="1234 5678 9012 3456"
+                    required
+                    maxLength={19}
+                    className="mt-2"
+                  />
+                </div>
 
-            {/* Price Summary */}
-            <Card className="shadow-none">
-              <CardContent className="p-6">
-                <div className="flex items-center justify-center">
-                  <div className="flex items-center gap-2">
-                    <Euro className="w-5 h-5 text-muted-foreground" />
-                    <span className="text-2xl font-bold font-mono" style={{ fontFamily: 'var(--font-source-code-pro)' }}>
-                      €{price.toFixed(2)}
-                    </span>
+                {/* Cardholder Name */}
+                <div>
+                  <Label htmlFor="cardholderName">Cardholder Name *</Label>
+                  <Input
+                    id="cardholderName"
+                    type="text"
+                    value={cardData.cardholderName}
+                    onChange={(e) => setCardData({ ...cardData, cardholderName: e.target.value })}
+                    placeholder="John Doe"
+                    required
+                    className="mt-2"
+                  />
+                </div>
+
+                {/* Expiry and CVV */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="expiryDate">Expiry Date *</Label>
+                    <Input
+                      id="expiryDate"
+                      type="text"
+                      value={cardData.expiryDate}
+                      onChange={(e) => {
+                        let value = e.target.value.replace(/\D/g, '')
+                        if (value.length >= 2) {
+                          value = value.slice(0, 2) + '/' + value.slice(2, 4)
+                        }
+                        setCardData({ ...cardData, expiryDate: value })
+                      }}
+                      placeholder="MM/YY"
+                      required
+                      maxLength={5}
+                      className="mt-2"
+                    />
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="cvv">CVV *</Label>
+                    <Input
+                      id="cvv"
+                      type="text"
+                      value={cardData.cvv}
+                      onChange={(e) => setCardData({ ...cardData, cvv: e.target.value.replace(/\D/g, '').slice(0, 4) })}
+                      placeholder="123"
+                      required
+                      maxLength={4}
+                      className="mt-2"
+                    />
                   </div>
                 </div>
-              </CardContent>
-            </Card>
 
-            {/* Error Message */}
-            {error && (
-              <Card className="shadow-none border-rose-500">
-                <CardContent className="p-6">
-                  <p className="text-rose-500">{error}</p>
-                </CardContent>
-              </Card>
-            )}
+                {/* Price Summary */}
+                <div className="pt-4 border-t border-black/10 dark:border-white/10">
+                  <div className="flex items-center justify-between">
+                    <span className="text-lg" style={{ fontFamily: 'var(--font-au-regular)' }}>Total</span>
+                    <div className="flex items-center gap-2">
+                      <Euro className="w-5 h-5 text-muted-foreground" />
+                      <span className="text-2xl font-bold font-mono" style={{ fontFamily: 'var(--font-source-code-pro)' }}>
+                        €{booking.total_price.toFixed(2)}
+                      </span>
+                    </div>
+                  </div>
+                </div>
 
-            {/* Submit Button */}
-            <Button
-              type="submit"
-              size="lg"
-              disabled={!provider.available || submitting}
-              className="w-full"
-            >
-              {submitting ? 'Booking...' : 'Confirm Booking'}
-            </Button>
-          </form>
+                {/* Error Message */}
+                {error && (
+                  <Card className="shadow-none border-rose-500">
+                    <CardContent className="p-6">
+                      <p className="text-rose-500">{error}</p>
+                    </CardContent>
+                  </Card>
+                )}
+
+                {/* Submit Button */}
+                <Button
+                  type="submit"
+                  size="lg"
+                  disabled={submitting}
+                  className="w-full"
+                >
+                  {submitting ? 'Processing...' : 'Complete Payment'}
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
         </div>
       </main>
 
@@ -276,4 +287,3 @@ export default function BookPage() {
     </div>
   )
 }
-
