@@ -23,13 +23,14 @@ export default function BookingsPage() {
 
   useEffect(() => {
     if (success === 'true' && bookingId) {
+      const bookingIdValue = bookingId // TypeScript type narrowing
       setShowConfetti(true)
       // Hide confetti after animation
       const timer = setTimeout(() => setShowConfetti(false), 5000)
       
       async function loadBooking() {
         try {
-          const bookingData = await getBookingById(bookingId)
+          const bookingData = await getBookingById(bookingIdValue)
           setBooking(bookingData)
         } catch (err) {
           console.error('Failed to load booking:', err)
