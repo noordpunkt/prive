@@ -22,20 +22,33 @@ export default async function ProviderPage({ params }: ProviderPageProps) {
   let provider
   let servicePackages = []
   let reviews = []
-  let error: string | null = null
   
   try {
     provider = await getProviderById(id)
-    if (provider) {
+    if (!provider) {
+      notFound()
+    }
+    
+    // Only fetch related data if provider exists
+    try {
       servicePackages = await getServicePackagesByProvider(id)
+    } catch (err) {
+      console.error('Error fetching service packages:', err)
+      // Continue even if packages fail
+    }
+    
+    try {
       reviews = await getReviewsByProvider(id)
+    } catch (err) {
+      console.error('Error fetching reviews:', err)
+      // Continue even if reviews fail
     }
   } catch (err) {
     console.error('Error fetching provider:', err)
-    error = err instanceof Error ? err.message : 'Unknown error'
+    notFound()
   }
 
-  if (!provider || error) {
+  if (!provider) {
     notFound()
   }
 

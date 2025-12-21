@@ -70,33 +70,47 @@ export async function getProvidersByCategory(categoryId: string) {
 }
 
 export async function getProviderById(providerId: string) {
-  const supabase = await createClient()
-  
-  const { data, error } = await supabase
-    .from('service_providers')
-    .select(`
-      *,
-      service_category:service_categories (*),
-      profiles:profile_id (
-        id,
-        full_name,
-        avatar_url,
-        email,
-        phone,
-        location,
-        languages
-      )
-    `)
-    .eq('id', providerId)
-    .eq('status', 'approved')
-    .single()
+  try {
+    const supabase = await createClient()
+    
+    const { data, error } = await supabase
+      .from('service_providers')
+      .select(`
+        *,
+        service_category:service_categories (*),
+        profiles:profile_id (
+          id,
+          full_name,
+          avatar_url,
+          email,
+          phone,
+          location,
+          languages
+        )
+      `)
+      .eq('id', providerId)
+      .eq('status', 'approved')
+      .single()
 
-  if (error) {
-    console.error('Error fetching provider:', error)
-    throw new Error(`Failed to fetch provider: ${error.message}`)
+    if (error) {
+      // If provider not found or not approved, return null instead of throwing
+      if (error.code === 'PGRST116') {
+        return null
+      }
+      console.error('Error fetching provider:', error)
+      throw new Error(`Failed to fetch provider: ${error.message}`)
+    }
+
+    if (!data) {
+      return null
+    }
+
+    return data
+  } catch (err) {
+    // Catch any unexpected errors and return null
+    console.error('Unexpected error in getProviderById:', err)
+    return null
   }
-
-  return data
 }
 
 export async function getServicePackagesByProvider(providerId: string) {
