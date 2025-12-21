@@ -16,6 +16,7 @@ function BookingsContent() {
   const [booking, setBooking] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [showConfetti, setShowConfetti] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const success = searchParams.get('success')
   const bookingId = searchParams.get('booking')
@@ -33,6 +34,7 @@ function BookingsContent() {
           setBooking(bookingData)
         } catch (err) {
           console.error('Failed to load booking:', err)
+          setError(err instanceof Error ? err.message : 'Failed to load booking')
         } finally {
           setLoading(false)
         }
@@ -52,6 +54,38 @@ function BookingsContent() {
         <main className="pt-24">
           <div className="container mx-auto px-4 py-16 text-center">
             <p className="text-muted-foreground">Loading...</p>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <main className="pt-24">
+          <div className="container mx-auto px-4 py-16 text-center max-w-3xl">
+            <Card className="shadow-none">
+              <CardContent className="p-6">
+                <h1
+                  className="text-2xl font-bold mb-4"
+                  style={{ fontFamily: 'var(--font-au-bold)' }}
+                >
+                  Error Loading Booking
+                </h1>
+                <p className="text-muted-foreground mb-6">{error}</p>
+                <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                  <Button asChild>
+                    <Link href="/">Go Home</Link>
+                  </Button>
+                  <Button asChild variant="outline">
+                    <Link href="/bookings">Try Again</Link>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
           </div>
         </main>
         <Footer />

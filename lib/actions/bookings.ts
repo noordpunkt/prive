@@ -148,46 +148,59 @@ export async function saveBookingDetails(bookingData: {
 }
 
 export async function getBookingById(bookingId: string) {
-  const supabase = await createClient()
-  
-  const { data: { user }, error: authError } = await supabase.auth.getUser()
-  
-  if (authError || !user) {
-    throw new Error('Unauthorized')
-  }
+  try {
+    const supabase = await createClient()
+    
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    
+    if (authError || !user) {
+      throw new Error('Unauthorized: Please sign in to view this booking')
+    }
 
-  const { data: booking, error } = await supabase
-    .from('bookings')
-    .select(`
-      *,
-      service_category:service_categories (*),
-      provider:service_providers (
+    const { data: booking, error } = await supabase
+      .from('bookings')
+      .select(`
         *,
-        profiles:profile_id (
+        service_category:service_categories (*),
+        provider:service_providers (
+          *,
+          profiles:profile_id (
+            id,
+            full_name,
+            avatar_url
+          )
+        ),
+        customer:profiles!bookings_customer_id_fkey (
           id,
           full_name,
           avatar_url
         )
-      ),
-      customer:profiles!bookings_customer_id_fkey (
-        id,
-        full_name,
-        avatar_url
-      )
-    `)
-    .eq('id', bookingId)
-    .single()
+      `)
+      .eq('id', bookingId)
+      .single()
 
-  if (error) {
-    throw new Error(`Failed to fetch booking: ${error.message}`)
+    if (error) {
+      console.error('Database error fetching booking:', error)
+      throw new Error(`Failed to fetch booking: ${error.message}`)
+    }
+
+    if (!booking) {
+      throw new Error('Booking not found')
+    }
+
+    // Verify user owns this booking
+    if (booking.customer_id !== user.id) {
+      throw new Error('Unauthorized: You do not have access to this booking')
+    }
+
+    return booking
+  } catch (err) {
+    // Re-throw with more context if it's not already an Error
+    if (err instanceof Error) {
+      throw err
+    }
+    throw new Error('An unexpected error occurred while fetching the booking')
   }
-
-  // Verify user owns this booking
-  if (booking.customer_id !== user.id) {
-    throw new Error('Unauthorized')
-  }
-
-  return booking
 }
 
 export async function getBookings() {
