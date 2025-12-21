@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState, Suspense } from 'react'
-import { useSearchParams, useRouter } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 import { Header } from '@/components/Header'
 import { Footer } from '@/components/Footer'
 import { Button } from '@/components/ui/button'
@@ -13,7 +13,6 @@ import Link from 'next/link'
 
 function BookingsContent() {
   const searchParams = useSearchParams()
-  const router = useRouter()
   const [booking, setBooking] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [showConfetti, setShowConfetti] = useState(false)
