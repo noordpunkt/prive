@@ -4,10 +4,6 @@ import { NextResponse } from 'next/server'
 
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY
 
-if (!stripeSecretKey) {
-  console.error('STRIPE_SECRET_KEY is not set')
-}
-
 const stripe = stripeSecretKey ? new Stripe(stripeSecretKey, {
   apiVersion: '2025-12-15.clover',
 }) : null

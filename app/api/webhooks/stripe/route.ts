@@ -6,14 +6,6 @@ import { headers } from 'next/headers'
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET
 
-if (!stripeSecretKey) {
-  console.error('STRIPE_SECRET_KEY is not set')
-}
-
-if (!webhookSecret) {
-  console.error('STRIPE_WEBHOOK_SECRET is not set')
-}
-
 const stripe = stripeSecretKey ? new Stripe(stripeSecretKey, {
   apiVersion: '2025-12-15.clover',
 }) : null

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import { Header } from '@/components/Header'
 import { Footer } from '@/components/Footer'
@@ -11,7 +11,7 @@ import { Confetti } from '@/components/Confetti'
 import { CheckCircle2 } from 'lucide-react'
 import Link from 'next/link'
 
-export default function BookingsPage() {
+function BookingsContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const [booking, setBooking] = useState<any>(null)
@@ -187,6 +187,24 @@ export default function BookingsPage() {
       </main>
       <Footer />
     </div>
+  )
+}
+
+export default function BookingsPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-background">
+        <Header />
+        <main className="pt-24">
+          <div className="container mx-auto px-4 py-16 text-center">
+            <p className="text-muted-foreground">Loading...</p>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    }>
+      <BookingsContent />
+    </Suspense>
   )
 }
 
