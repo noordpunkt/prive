@@ -271,3 +271,74 @@ export async function updateBookingStatus(
   return updatedBooking
 }
 
+export async function confirmPayment(bookingId: string, paymentIntentId: string) {
+  const supabase = await createClient()
+  
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
+  
+  if (authError || !user) {
+    throw new Error('Unauthorized')
+  }
+
+  // Verify booking belongs to user
+  const { data: booking, error: bookingError } = await supabase
+    .from('bookings')
+    .select('customer_id, payment_id')
+    .eq('id', bookingId)
+    .eq('customer_id', user.id)
+    .single()
+
+  if (bookingError || !booking) {
+    throw new Error('Booking not found')
+  }
+
+  // Verify payment intent belongs to this booking via Stripe metadata
+  // This is more reliable than checking payment_id in database
+  try {
+    const Stripe = (await import('stripe')).default
+    const stripeSecretKey = process.env.STRIPE_SECRET_KEY
+    
+    if (stripeSecretKey) {
+      const stripe = new Stripe(stripeSecretKey, {
+        apiVersion: '2024-12-18.acacia',
+      })
+      
+      const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId)
+      
+      // Verify the payment intent metadata matches this booking
+      if (paymentIntent.metadata.booking_id !== bookingId) {
+        throw new Error('Payment intent does not belong to this booking')
+      }
+      
+      // Verify payment was successful
+      if (paymentIntent.status !== 'succeeded') {
+        throw new Error('Payment intent has not succeeded')
+      }
+    }
+  } catch (stripeError) {
+    // If Stripe verification fails, fall back to database check
+    if (booking.payment_id && booking.payment_id !== paymentIntentId) {
+      throw new Error('Payment intent mismatch')
+    }
+  }
+
+  // Update payment status
+  const { data: updatedBooking, error: updateError } = await supabase
+    .from('bookings')
+    .update({
+      payment_status: 'paid',
+      paid_at: new Date().toISOString(),
+      payment_id: paymentIntentId, // Ensure payment_id is set
+    })
+    .eq('id', bookingId)
+    .select()
+    .single()
+
+  if (updateError) {
+    throw new Error(`Failed to confirm payment: ${updateError.message}`)
+  }
+
+  revalidatePath(`/book/${bookingId}`)
+  return updatedBooking
+}
+

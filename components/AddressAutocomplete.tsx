@@ -88,7 +88,7 @@ export function AddressAutocomplete({
           placeholder={placeholder}
           required={required}
           disabled={disabled}
-          className="pb-2"
+          className="pb-2 text-lg"
         />
       </div>
       

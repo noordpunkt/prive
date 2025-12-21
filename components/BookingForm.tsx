@@ -192,8 +192,8 @@ export function BookingForm({ providerId, provider }: BookingFormProps) {
             onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
             placeholder="Any special requests or notes for the provider"
             disabled={!provider.available}
-            className="mt-2"
-            rows={4}
+            className="mt-2 text-lg resize-none"
+            rows={3}
           />
         </div>
 
@@ -213,7 +213,7 @@ export function BookingForm({ providerId, provider }: BookingFormProps) {
           disabled={!provider.available || submitting}
           className="w-full"
         >
-          {submitting ? 'Saving...' : 'Continue to Payment'}
+          {submitting ? 'Saving...' : 'Checkout'}
         </Button>
       </form>
     </div>
