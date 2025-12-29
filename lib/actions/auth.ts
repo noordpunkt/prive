@@ -8,28 +8,34 @@ export async function signUp(
   password: string, 
   name?: string
 ) {
-  const supabase = await createClient()
-  
-  const fullName = name?.trim() || ''
-  
-  const { data, error } = await supabase.auth.signUp({
-    email,
-    password,
-    options: {
-      data: {
-        full_name: fullName,
+  try {
+    // Check if Supabase is configured
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+      throw new Error('Supabase is not configured. Please check your environment variables.')
+    }
+
+    const supabase = await createClient()
+    
+    const fullName = name?.trim() || ''
+    
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          full_name: fullName,
+        },
+        emailRedirectTo: undefined, // Disable email confirmation redirect
       },
-      emailRedirectTo: undefined, // Disable email confirmation redirect
-    },
-  })
+    })
 
-  if (error) {
-    throw new Error(`Sign up failed: ${error.message}`)
-  }
+    if (error) {
+      throw new Error(`Sign up failed: ${error.message}`)
+    }
 
-  if (!data.user) {
-    throw new Error('Sign up failed: User was not created')
-  }
+    if (!data.user) {
+      throw new Error('Sign up failed: User was not created')
+    }
 
   // Wait a bit for the trigger to create the profile
   await new Promise(resolve => setTimeout(resolve, 1500))
@@ -69,43 +75,63 @@ export async function signUp(
     }
   }
 
-  return data
+    return data
+  } catch (err) {
+    // Re-throw with more context
+    if (err instanceof Error) {
+      throw err
+    }
+    throw new Error('An unexpected error occurred during sign up')
+  }
 }
 
 export async function signIn(email: string, password: string) {
-  const supabase = await createClient()
-  
-  const { error } = await supabase.auth.signInWithPassword({
-    email,
-    password,
-  })
-
-  if (error) {
-    throw new Error(`Sign in failed: ${error.message}`)
-  }
-
-  // Get user to determine redirect
-  const { data: { user } } = await supabase.auth.getUser()
-  if (user) {
-    // Check user role
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', user.id)
-      .single()
-
-    if (profile?.role === 'admin') {
-      redirect('/admin')
-      return
+  try {
+    // Check if Supabase is configured
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+      throw new Error('Supabase is not configured. Please check your environment variables.')
     }
 
-    if (profile?.role === 'provider') {
-      redirect('/provider/dashboard')
-      return
+    const supabase = await createClient()
+    
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    })
+
+    if (error) {
+      throw new Error(`Sign in failed: ${error.message}`)
     }
+
+    // Get user to determine redirect
+    const { data: { user } } = await supabase.auth.getUser()
+    if (user) {
+      // Check user role
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single()
+
+      if (profile?.role === 'admin') {
+        redirect('/admin')
+        return
+      }
+
+      if (profile?.role === 'provider') {
+        redirect('/provider/dashboard')
+        return
+      }
+    }
+    
+    redirect('/')
+  } catch (err) {
+    // Re-throw with more context
+    if (err instanceof Error) {
+      throw err
+    }
+    throw new Error('An unexpected error occurred during sign in')
   }
-  
-  redirect('/')
 }
 
 export async function signOut() {

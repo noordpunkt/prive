@@ -59,34 +59,23 @@ export default function Home() {
                   </div>
                 )}
                 
-                {/* Icon for Coiffeur Privé - top right */}
+                {/* Icon for Atelier Pâtisserie - top right */}
                 {index === 1 && (
                   <div className="absolute top-8 right-8 z-10">
                     <img 
                       src="/images/Icon02.svg" 
-                      alt="Coiffeur Privé Icon" 
+                      alt="Atelier Pâtisserie Icon" 
                       className="w-10 h-10 md:w-12 md:h-12 invert dark:invert-0"
                     />
                   </div>
                 )}
                 
-                {/* Icon for Cooking classes - top right */}
+                {/* Icon for Intérieurs - top right */}
                 {index === 2 && (
                   <div className="absolute top-8 right-8 z-10">
                     <img 
                       src="/images/Icon03.svg" 
-                      alt="Cooking classes Icon" 
-                      className="w-10 h-10 md:w-12 md:h-12 invert dark:invert-0"
-                    />
-                  </div>
-                )}
-                
-                {/* Icon for Interior Stylist - top right */}
-                {index === 3 && (
-                  <div className="absolute top-8 right-8 z-10">
-                    <img 
-                      src="/images/Icon04.svg" 
-                      alt="Interior Stylist Icon" 
+                      alt="Intérieurs Icon" 
                       className="w-10 h-10 md:w-12 md:h-12 invert dark:invert-0"
                     />
                   </div>

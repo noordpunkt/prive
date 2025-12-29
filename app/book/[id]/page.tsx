@@ -10,7 +10,6 @@ import { Label } from '@/components/ui/label'
 import { getBookingById, confirmPayment } from '@/lib/actions/bookings'
 import { StripeProvider } from '@/components/StripeProvider'
 import { PaymentForm } from '@/components/PaymentForm'
-import { Euro } from 'lucide-react'
 import Link from 'next/link'
 
 export default function BookPage() {
@@ -200,12 +199,9 @@ export default function BookPage() {
                 <div className="pt-6 mt-6 border-t border-black/10 dark:border-white/10">
                   <div className="flex items-center justify-between">
                     <span className="text-lg" style={{ fontFamily: 'var(--font-au-regular)' }}>Total</span>
-                    <div className="flex items-center gap-2">
-                      <Euro className="w-5 h-5 text-muted-foreground" />
-                      <span className="text-2xl font-bold font-mono" style={{ fontFamily: 'var(--font-source-code-pro)' }}>
-                        €{booking.total_price.toFixed(2)}
-                      </span>
-                    </div>
+                    <span className="text-2xl font-bold font-mono" style={{ fontFamily: 'var(--font-source-code-pro)' }}>
+                      €{booking.total_price.toFixed(2)}
+                    </span>
                   </div>
                 </div>
 

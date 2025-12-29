@@ -3,10 +3,8 @@ import Link from 'next/link'
 import { SERVICE_CATEGORIES } from '@/types/services'
 
 export function Footer() {
-  // Filter out "Coiffeur Privé" and dynamically list all other services
-  const footerServices = SERVICE_CATEGORIES.filter(
-    service => service.slug !== 'coiffeur-prive'
-  )
+  // List all services
+  const footerServices = SERVICE_CATEGORIES
 
   return (
     <footer className="border-t mt-24">
